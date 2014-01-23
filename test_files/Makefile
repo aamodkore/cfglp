@@ -1,2 +1,4 @@
+all:
+
 clean:
-	rm *.cfg *.ast *.toks *.eval
+	rm *.cfg *.eval *.toks *.ast *.out
