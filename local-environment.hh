@@ -24,8 +24,9 @@
 #ifndef LOCAL_ENVIRONMENT_HH
 #define LOCAL_ENVIRONMENT_HH
 
-#include<string>
-#include<map>
+#include <string>
+
+#include <map>
 
 #define VAR_SPACE "         "
 
