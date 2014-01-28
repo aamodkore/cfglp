@@ -24,7 +24,7 @@
 #ifndef AST_HH
 #define AST_HH
 
-#include<string>
+#include <string>
 
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
@@ -116,9 +116,21 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
-class Relational_Expression_Ast:public Ast
+class Relational_Expr_Ast:public Ast
 {
-      
+
+public:
+	Relational_Expr_Ast() ;
+	~Relational_Expr_Ast() ;
+
+	Data_Type get_data_type();
+	
+	void print_ast(ostream & file_buffer);
+	void print_value(Local_Environment & eval_env, ostream & file_buffer);
+
+	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
+	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 #endif
