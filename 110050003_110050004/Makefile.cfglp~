@@ -60,6 +60,6 @@ clean :
 	rm -rf cscope.out tags a.out
 	
 submit : clean
-	mkdir -p $(SUBMIT_DIR)
-	cp *.hh *.cc *.h *.ih *.ll *.yy Makefile* $(SUBMIT_DIR)
+   mkdir -p $(SUBMIT_DIR)
+   cp *.hh *.cc *.h *.ih *.ll *.yy Makefile* $(SUBMIT_DIR)
    
