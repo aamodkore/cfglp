@@ -19,70 +19,59 @@
            tools are  available at http://www.cse.iitb.ac.in/~uday/cfglp
 ***********************************************************************************************/
 
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
-#include"user-options.hh"
-#include"error-display.hh"
-#include"local-environment.hh"
+#include "user-options.hh"
+#include "error-display.hh"
+#include "local-environment.hh"
 
-#include"symbol-table.hh"
-#include"ast.hh"
+#include "symbol-table.hh"
+#include "ast.hh"
 
-Ast::Ast()
-{}
+Ast::Ast() {}
 
-Ast::~Ast()
-{}
+Ast::~Ast() {}
 
-bool Ast::check_ast(int line)
-{
+bool Ast::check_ast(int line) {
 	report_internal_error("Should not reach, Ast : check_ast");
 }
 
-Data_Type Ast::get_data_type()
-{
+Data_Type Ast::get_data_type() {
 	report_internal_error("Should not reach, Ast : get_data_type");
 }
 
-void Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
-{
+void Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) {
 	report_internal_error("Should not reach, Ast : print_value");
 }
 
-Eval_Result & Ast::get_value_of_evaluation(Local_Environment & eval_env)
-{
+Eval_Result & Ast::get_value_of_evaluation(Local_Environment & eval_env) {
 	report_internal_error("Should not reach, Ast : get_value_of_evaluation");
 }
 
-void Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
-{
+void Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result) {
 	report_internal_error("Should not reach, Ast : set_value_of_evaluation");
 }
 
 ////////////////////////////////////////////////////////////////
 
-Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs)
-{
+Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs) {
 	lhs = temp_lhs;
 	rhs = temp_rhs;
 }
 
-Assignment_Ast::~Assignment_Ast()
-{
+Assignment_Ast::~Assignment_Ast() {
 	delete lhs;
 	delete rhs;
 }
 
-Data_Type Assignment_Ast::get_data_type()
-{
+Data_Type Assignment_Ast::get_data_type() {
 	return node_data_type;
 }
 
-bool Assignment_Ast::check_ast(int line)
-{
+bool Assignment_Ast::check_ast(int line) {
 	if (lhs->get_data_type() == rhs->get_data_type())
 	{
 		node_data_type = lhs->get_data_type();
@@ -92,8 +81,7 @@ bool Assignment_Ast::check_ast(int line)
 	report_error("Assignment statement data type not compatible", line);
 }
 
-void Assignment_Ast::print_ast(ostream & file_buffer)
-{
+void Assignment_Ast::print_ast(ostream & file_buffer) {
 	file_buffer << AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
@@ -105,8 +93,7 @@ void Assignment_Ast::print_ast(ostream & file_buffer)
 	file_buffer << ")\n";
 }
 
-Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-{
+Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	Eval_Result & result = rhs->evaluate(eval_env, file_buffer);
 
 	if (result.is_variable_defined() == false)
@@ -124,27 +111,22 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 }
 /////////////////////////////////////////////////////////////////
 
-Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry)
-{
+Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry) {
 	variable_name = name;
 	variable_symbol_entry = var_entry;
 }
 
-Name_Ast::~Name_Ast()
-{}
+Name_Ast::~Name_Ast() {}
 
-Data_Type Name_Ast::get_data_type()
-{
+Data_Type Name_Ast::get_data_type() {
 	return variable_symbol_entry.get_data_type();
 }
 
-void Name_Ast::print_ast(ostream & file_buffer)
-{
+void Name_Ast::print_ast(ostream & file_buffer) {
 	file_buffer << "Name : " << variable_name;
 }
 
-void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
-{
+void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) {
 	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
 
@@ -176,8 +158,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 	file_buffer << "\n";
 }
 
-Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
-{
+Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env) {
 	if (eval_env.does_variable_exist(variable_name))
 	{
 		Eval_Result * result = eval_env.get_variable_value(variable_name);
@@ -188,8 +169,7 @@ Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
 	return *result;
 }
 
-void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
-{
+void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result) {
 	Eval_Result_Value * i;
 	if (result.get_result_enum() == int_result)
 	{
@@ -203,39 +183,33 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 		interpreter_global_table.put_variable_value(*i, variable_name);
 }
 
-Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-{
+Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	return get_value_of_evaluation(eval_env);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 template <class DATA_TYPE>
-Number_Ast<DATA_TYPE>::Number_Ast(DATA_TYPE number, Data_Type constant_data_type)
-{
+Number_Ast<DATA_TYPE>::Number_Ast(DATA_TYPE number, Data_Type constant_data_type) {
 	constant = number;
 	node_data_type = constant_data_type;
 }
 
 template <class DATA_TYPE>
-Number_Ast<DATA_TYPE>::~Number_Ast()
-{}
+Number_Ast<DATA_TYPE>::~Number_Ast() {}
 
 template <class DATA_TYPE>
-Data_Type Number_Ast<DATA_TYPE>::get_data_type()
-{
+Data_Type Number_Ast<DATA_TYPE>::get_data_type() {
 	return node_data_type;
 }
 
 template <class DATA_TYPE>
-void Number_Ast<DATA_TYPE>::print_ast(ostream & file_buffer)
-{
+void Number_Ast<DATA_TYPE>::print_ast(ostream & file_buffer) {
 	file_buffer << "Num : " << constant;
 }
 
 template <class DATA_TYPE>
-Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-{
+Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	if (node_data_type == int_data_type)
 	{
 		Eval_Result & result = *new Eval_Result_Value_Int();
@@ -247,19 +221,15 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Return_Ast::Return_Ast()
-{}
+Return_Ast::Return_Ast() {}
 
-Return_Ast::~Return_Ast()
-{}
+Return_Ast::~Return_Ast() {}
 
-void Return_Ast::print_ast(ostream & file_buffer)
-{
+void Return_Ast::print_ast(ostream & file_buffer) {
 	file_buffer << AST_SPACE << "Return <NOTHING>\n";
 }
 
-Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-{
+Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
 }

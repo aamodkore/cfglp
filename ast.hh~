@@ -158,6 +158,7 @@ public:
 	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
 	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+>>>>>>> 31a391dabc9b1b32b347de2390f053ae14a59bc8
 };
 
 
