@@ -92,7 +92,54 @@ Result_Enum Eval_Result_Value_Int::get_result_enum()
 {
 	return result_type;
 }
+///////////////////////////////////////////////////////////////////////////////////
 
+Eval_Result_BB::Eval_Result_BB()
+{
+	block_no = 0;
+	valid = false;
+	result_type = bb_result;
+}
+
+Eval_Result_BB::Eval_Result_BB(int n)
+{
+	block_no = n;
+	valid = true;
+	result_type = bb_result;
+}
+
+Eval_Result_BB::~Eval_Result_BB()
+{ }
+
+void Eval_Result_BB::set_value(int number)
+{
+	block_no = number;
+}
+
+int Eval_Result_BB::get_value()
+{
+	return block_no;
+}
+
+void Eval_Result_BB::set_variable_status(bool def)
+{
+	valid = def;
+}
+
+bool Eval_Result_BB::is_variable_defined()
+{
+	return valid;
+}
+
+void Eval_Result_BB::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+Result_Enum Eval_Result_BB::get_result_enum()
+{
+	return result_type;
+}
 ///////////////////////////////////////////////////////////////////////////////////
 
 Local_Environment::Local_Environment()

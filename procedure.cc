@@ -115,6 +115,16 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 	return NULL;
 }
 
+Basic_Block * Procedure::get_next_bb(int bb_no) 
+{
+  list<Basic_Block *>::iterator i;
+  for(i = basic_block_list.begin(); i != basic_block_list.end(); i++) {
+    if((*i)->get_bb_number() == bb_no) {
+      return (*i);
+    }
+  }
+}
+
 Eval_Result & Procedure::evaluate(ostream & file_buffer)
 {
 	Local_Environment & eval_env = *new Local_Environment();
@@ -130,8 +140,13 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 	Basic_Block * current_bb = &(get_start_basic_block());
 	while (current_bb)
 	{
-		result = &(current_bb->evaluate(eval_env, file_buffer));
-		current_bb = get_next_bb(*current_bb);		
+	  result = &(current_bb->evaluate(eval_env, file_buffer));
+	  if( result->get_result_enum() == bb_result ) {
+	    current_bb = get_next_bb(result->get_value()); 
+	  }
+	  else {
+	    current_bb = get_next_bb(*current_bb);	
+	  }	
 	}
 
 	file_buffer << "\n\n";
