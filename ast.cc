@@ -17,8 +17,6 @@
 
            Documentation (functionality, manual, and design) and related
            tools are  available at http://www.cse.iitb.ac.in/~uday/cfglp
-
-
 ***********************************************************************************************/
 
 #include<iostream>
@@ -267,3 +265,45 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 }
 
 template class Number_Ast<int>;
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Goto_Ast::Goto_Ast() 
+{}
+
+Goto_Ast::~Goto_Ast() 
+{}
+
+void Goto_Ast::print_ast(ostream & file_buffer)
+{
+  file_buffer << AST_SPACE << "Goto BB " << block_no <<"\n";
+}
+
+Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+  Eval_Result & result = *new Eval_Result_BB(block_no);
+  return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+If_Else_Ast::If_Else_Ast() 
+{}
+
+If_Else_Ast::~If_Else_Ast() 
+{}
+
+void If_Else_Ast::print_ast(ostream & file_buffer)
+{
+  
+}
+
+Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) { 
+  Eval_Result & cond = condition->evaluate(eval_env, file_buffer);
+  if(cond.get_value() == 1) {
+    return if_goto->evaluate(eval_env, file_buffer);
+  }
+  else {
+    return else_goto->evaluate(eval_env, file_buffer);
+  }
+}
+

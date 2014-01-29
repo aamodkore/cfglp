@@ -116,9 +116,35 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
-class Relational_Expression_Ast:public Ast
+
+class Goto_Ast:public Ast 
 {
-      
+  int block_no;
+
+public:
+  Goto_Ast();
+  ~Goto_Ast();
+
+  void print_ast(ostream & file_buffer);
+  
+  Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
+
+
+class If_Else_Ast:public Ast 
+{
+  Ast * condition;
+  Ast * if_goto;
+  Ast * else_goto;
+
+public:
+  If_Else_Ast();
+  ~If_Else_Ast();
+
+  void print_ast(ostream & file_buffer);
+  
+  Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
 
 #endif
