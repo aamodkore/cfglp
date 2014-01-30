@@ -29,7 +29,7 @@ SYMTAB_OBJ = symbol-table.o
 OBJ_CORE = error-display.o main.o user-options.o local-environment.o
 OBJ_GEN = scanner.o parser.o
 
-HEADERS_CORE = error-display.hh user-options.hh local-environment.hh ast.hh ast2.hh symbol-table.hh program.hh procedure.hh basic-block.hh
+HEADERS_CORE = error-display.hh user-options.hh local-environment.hh ast.hh symbol-table.hh program.hh procedure.hh basic-block.hh
 HEADERS_GEN = parser.h parser.ih parserbase.h scanner.h scanner.ih scannerbase.h
 
 OBJ = $(OBJ_GEN) $(OBJ_CORE) $(AST_OBJ) $(PROC_OBJ) $(BB_OBJ) $(PROG_OBJ) $(SYMTAB_OBJ)
