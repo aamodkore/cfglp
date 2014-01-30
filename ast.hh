@@ -121,6 +121,7 @@ class Goto_Ast:public Ast
 
 public:
   Goto_Ast();
+  Goto_Ast(int bb);
   ~Goto_Ast();
 
   void print_ast(ostream & file_buffer);
