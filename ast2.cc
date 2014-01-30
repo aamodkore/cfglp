@@ -8,7 +8,7 @@ using namespace std;
 #include "local-environment.hh"
 
 #include "symbol-table.hh"
-#include "ast.hh"
+#include "ast2.hh"
 
 Relational_Expr_Ast::Relational_Expr_Ast() {}
 Relational_Expr_Ast::~Relational_Expr_Ast() {}

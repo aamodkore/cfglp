@@ -41,7 +41,8 @@
 
 %token <integer_value> INTEGER_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER IF ELSE GOTO
+%token RETURN BB INTEGER IF ELSE GOTO
+%token GT LT GE LE NE EQ ASSIGN_OP
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -50,6 +51,9 @@
 %type <ast_list> executable_statement_list
 %type <ast_list> assignment_statement_list
 %type <ast> assignment_statement
+%type <ast> if_else_statement
+%type <ast> goto_statement
+%type <ast> relational_expression
 %type <ast> variable
 %type <ast> constant
 
@@ -60,57 +64,59 @@
 program:
 	declaration_statement_list procedure_name
 	{
-	#if 0
+	// #if 0
 		program_object.set_global_table(*$1);
 		return_statement_used_flag = false;				// No return statement in the current procedure till now
-	#endif
+	// #endif
 	}
 	procedure_body
 	{
-	#if 0
+	// #if 0
 		program_object.set_procedure_map(*current_procedure);
 
 		if ($1)
 			$1->global_list_in_proc_map_check(get_line_number());
 
 		delete $1;
-	#endif
+	// #endif
 	}
 |
 	procedure_name
 	{
-	#if 0
+	// #if 0
+	
 		return_statement_used_flag = false;				// No return statement in the current procedure till now
-	#endif
+
+	// #endif
 	}
 	procedure_body
 	{
-	#if 0
+	// #if 0
 		program_object.set_procedure_map(*current_procedure);
-	#endif
+	// #endif
 	}
 ;
 
 procedure_name:
 	NAME '(' ')'
 	{
-	#if 0
+	// #if 0
 		current_procedure = new Procedure(void_data_type, *$1);
-	#endif
+	// #endif
 	}
 ;
 
 procedure_body:
 	'{' declaration_statement_list
 	{
-	#if 0
+	// #if 0
 		current_procedure->set_local_list(*$2);
 		delete $2;
-	#endif
+	// #endif
 	}
 	basic_block_list '}'
 	{
-	#if 0
+	// #if 0
 		if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
@@ -120,12 +126,12 @@ procedure_body:
 		current_procedure->set_basic_block_list(*$4);
 
 		delete $4;
-	#endif
+	// #endif
 	}
 |
 	'{' basic_block_list '}'
 	{
-	#if 0
+	// #if 0
 		if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
@@ -135,14 +141,14 @@ procedure_body:
 		current_procedure->set_basic_block_list(*$2);
 
 		delete $2;
-	#endif
+	// #endif
 	}
 ;
 
 declaration_statement_list:
 	declaration_statement
 	{
-	#if 0
+	// #if 0
 		int line = get_line_number();
 		program_object.variable_in_proc_map_check($1->get_variable_name(), line);
 
@@ -155,12 +161,12 @@ declaration_statement_list:
 
 		$$ = new Symbol_Table();
 		$$->push_symbol($1);
-	#endif
+	// #endif
 	}
 |
 	declaration_statement_list declaration_statement
 	{
-	#if 0
+	// #if 0
 		// if declaration is local then no need to check in global list
 		// if declaration is global then this list is global list
 
@@ -189,25 +195,25 @@ declaration_statement_list:
 			$$ = new Symbol_Table();
 
 		$$->push_symbol($2);
-	#endif
+	// #endif
 	}
 ;
 
 declaration_statement:
 	INTEGER NAME ';'
 	{
-	#if 0
+	// #if 0
 		$$ = new Symbol_Table_Entry(*$2, int_data_type);
 
 		delete $2;
-	#endif
+	// #endif
 	}
 ;
 
 basic_block_list:
 	basic_block_list basic_block
 	{
-	#if 0
+	// #if 0
 		if (!$2)
 		{
 			int line = get_line_number();
@@ -218,12 +224,12 @@ basic_block_list:
 
 		$$ = $1;
 		$$->push_back($2);
-	#endif
+	// #endif
 	}
 |
 	basic_block
 	{
-	#if 0
+	// #if 0
 		if (!$1)
 		{
 			int line = get_line_number();
@@ -232,52 +238,30 @@ basic_block_list:
 
 		$$ = new list<Basic_Block *>;
 		$$->push_back($1);
-	#endif
+	// #endif
 	}
 	
 ;
 
 basic_block:
-	'<' NAME INTEGER_NUMBER '>' ':' executable_statement_list
+	BB ':' executable_statement_list
 	{
-	#if 0
-		if (*$2 != "bb")
-		{
-			int line = get_line_number();
-			report_error("Not basic block lable", line);
-		}
-
-		if ($3 < 2)
-		{
-			int line = get_line_number();
-			report_error("Illegal basic block lable", line);
-		}
-
-		if ($6 != NULL)
-			$$ = new Basic_Block($3, *$6);
-		else
-		{
-			list<Ast *> * ast_list = new list<Ast *>;
-			$$ = new Basic_Block($3, *ast_list);
-		}
-
-		delete $6;
-		delete $2;
-	#endif
+	// #if 0
+	// #endif
 	}
 ;
 
 executable_statement_list:
 	assignment_statement_list
 	{
-	#if 0
+	// #if 0
 		$$ = $1;
-	#endif
+	// #endif
 	}
 |
 	assignment_statement_list RETURN ';'
 	{
-	#if 0
+	// #if 0
 		Ast * ret = new Return_Ast();
 
 		return_statement_used_flag = true;					// Current procedure has an occurrence of return statement
@@ -289,7 +273,7 @@ executable_statement_list:
 			$$ = new list<Ast *>;
 
 		$$->push_back(ret);
-	#endif
+	// #endif
 	}
 |
 	assignment_statement_list 
@@ -303,14 +287,14 @@ executable_statement_list:
 
 assignment_statement_list:
 	{
-	#if 0
+	// #if 0
 		$$ = NULL;
-	#endif
+	// #endif
 	}
 |
 	assignment_statement_list assignment_statement
 	{
-	#if 0
+	// #if 0
 		if ($1 == NULL)
 			$$ = new list<Ast *>;
 
@@ -318,30 +302,20 @@ assignment_statement_list:
 			$$ = $1;
 
 		$$->push_back($2);
-	#endif
+	// #endif
 	}
 ;
 
 assignment_statement:
-	/* variable '=' variable ';' 
+	variable ASSIGN_OP relational_expression ';' 
 	{
-	#if 0
+	// #if 0
 		$$ = new Assignment_Ast($1, $3);
 
 		int line = get_line_number();
 		$$->check_ast(line);
-	#endif
-	} 
-	variable '=' constant ';'
-	{
-	#if 0
-		$$ = new Assignment_Ast($1, $3);
-
-		int line = get_line_number();
-		$$->check_ast(line);
-	#endif
-	} */
-	variable '=' relational_expression ';'
+	// #endif
+	}
 ;
 
 if_else_statement :
@@ -352,13 +326,19 @@ if_else_statement :
 ;
 
 goto_statement : 
-        GOTO '<' NAME INTEGER_NUMBER '>' ';'
+        GOTO BB ';'
 ;
 
 relational_expression :
-        relational_expression relational_operator variable 
+        relational_expression relational_operator variable
+	{
+		// $$ = new Relational_Expr_Ast();
+	} 
 | 
-	relational_expression relational_operator constant 
+	relational_expression relational_operator constant
+	{
+	// $$ = new Relational_Expr_Ast();
+	} 
 |	
 	variable
 |
@@ -366,12 +346,12 @@ relational_expression :
 ;
 
 relational_operator :
-        '>' | '<' | '<''=' | '>''=' | '=''=' | '!''=' 
+        GE | LE | GT | LT | EQ | NE 
 ;
 variable:
 	NAME
 	{
-	#if 0
+	// #if 0
 		Symbol_Table_Entry var_table_entry;
 
 		if (current_procedure->variable_in_symbol_list_check(*$1))
@@ -389,15 +369,15 @@ variable:
 		$$ = new Name_Ast(*$1, var_table_entry);
 
 		delete $1;
-	#endif
+	// #endif
 	}
 ;
 
 constant:
 	INTEGER_NUMBER
 	{
-	#if 0
+	// #if 0
 		$$ = new Number_Ast<int>($1, int_data_type);
-	#endif
+	// #endif
 	}
 ;
