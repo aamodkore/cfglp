@@ -53,6 +53,9 @@ goto		{
 		
 [<]bb[ ][0-9]+[>]	{ 
 				store_token_name("BASIC BLOCK");
+				ParserBase::STYPE__ * val = getSval();
+				matched().substr(4, matched().find(">") - 4);
+				val->integer_value = atoi(matched().substr(4, matched().find(">") - 4).c_str());
 				return Parser::BB;
 			}
 

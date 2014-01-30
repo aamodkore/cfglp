@@ -241,12 +241,18 @@ template class Number_Ast<int>;
 Goto_Ast::Goto_Ast() 
 {}
 
+Goto_Ast::Goto_Ast(int bb) 
+{
+  block_no = bb;
+}
+
 Goto_Ast::~Goto_Ast() 
 {}
 
 void Goto_Ast::print_ast(ostream & file_buffer)
 {
-  file_buffer << AST_SPACE << "Goto BB " << block_no <<"\n";
+  file_buffer << AST_SPACE << "Goto statement:\n";
+  file_buffer << AST_NODE_SPACE << "Successor: " << block_no << "\n";
 }
 
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
