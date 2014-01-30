@@ -36,9 +36,9 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	Eval_Result & lhsresult = lhs->evaluate(eval_env, file_buffer);
 	Eval_Result & rhsresult = rhs->evaluate(eval_env, file_buffer);
 
-	if (lhsresult.is_variable_defined())
+	if (!lhsresult.is_variable_defined())
 		report_error("Variable should be defined on LHS of comparison.", NOLINE);
-	if (rhsresult.is_variable_defined())
+	if (!rhsresult.is_variable_defined())
 		report_error("Variable should be defined on RHS of comparison.", NOLINE);
 
 

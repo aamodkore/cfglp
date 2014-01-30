@@ -37,6 +37,7 @@
 	Basic_Block * basic_block;
 	list<Basic_Block *> * basic_block_list;
 	Procedure * procedure;
+	enum Relational_Operator rel_op;
 };
 
 %token <integer_value> INTEGER_NUMBER
@@ -55,6 +56,7 @@
 %type <ast> if_else_statement
 %type <ast> goto_statement
 %type <ast> relational_expression
+%type <rel_op> relational_operator
 %type <ast> variable
 %type <ast> constant
 
@@ -319,21 +321,37 @@ goto_statement :
 relational_expression :
         relational_expression relational_operator variable
 	{
-		// $$ = new Relational_Expr_Ast();
+		$$ = new Relational_Expr_Ast($1, $2, $3);
 	} 
 | 
 	relational_expression relational_operator constant
 	{
-	// $$ = new Relational_Expr_Ast();
+		$$ = new Relational_Expr_Ast($1, $2, $3);
 	} 
 |	
 	variable
+	{
+		$$ = $1;
+	}
 |
 	constant
+	{
+		$$ = $1;
+	}
 ;
 
 relational_operator :
-        GE | LE | GT | LT | EQ | NE 
+        GE    { $$ = greater_equals_op; } 
+| 
+	LE    { $$ = less_equals_op; }
+| 
+	GT    { $$ = greater_than_op; }
+| 
+	LT    { $$ = less_than_op; } 
+| 
+	EQ    { $$ = equals_op; }	
+| 
+	NE    { $$ = not_equals_op; }	 
 ;
 variable:
 	NAME
