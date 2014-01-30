@@ -259,6 +259,13 @@ Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 If_Else_Ast::If_Else_Ast() 
 {}
 
+If_Else_Ast::If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g)  
+{
+  condition = cond;
+  if_goto = if_g;
+  else_goto = else_g;
+}
+
 If_Else_Ast::~If_Else_Ast() 
 {}
 

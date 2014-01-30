@@ -137,6 +137,7 @@ class If_Else_Ast:public Ast
 
 public:
   If_Else_Ast();
+  If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g);
   ~If_Else_Ast();
 
   void print_ast(ostream & file_buffer);
