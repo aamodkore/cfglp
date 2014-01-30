@@ -33,6 +33,12 @@ using namespace std;
 
 class Ast;
 
+enum Relational_Operator { 
+	greater_than_op, greater_equals_op, 
+	less_than_op, less_equals_op, 
+	equals_op, not_equals_op 
+};
+
 class Ast
 {
 protected:
@@ -132,9 +138,12 @@ public:
 
 class Relational_Expr_Ast:public Ast
 {
+	Ast * lhs;
+	Ast * rhs;
+	Relational_Operator relational_op ;
 
 public:
-	Relational_Expr_Ast() ;
+	Relational_Expr_Ast(Ast* temp_lhs, Relational_Operator op, Ast* temp_rhs) ;
 	~Relational_Expr_Ast() ;
 
 	Data_Type get_data_type();
@@ -142,8 +151,6 @@ public:
 	void print_ast(ostream & file_buffer);
 	void print_value(Local_Environment & eval_env, ostream & file_buffer);
 
-	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
-	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
