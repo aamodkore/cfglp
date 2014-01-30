@@ -28,6 +28,7 @@
 
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
+#define AST_SUB_NODE_SPACE "               "
 
 using namespace std;
 
@@ -149,8 +150,7 @@ public:
 	Data_Type get_data_type();
 	
 	void print_ast(ostream & file_buffer);
-	void print_value(Local_Environment & eval_env, ostream & file_buffer);
-
+	
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 

@@ -25,10 +25,26 @@ Data_Type Relational_Expr_Ast::get_data_type() {
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
 
-}
+	file_buffer << AST_NODE_SPACE << "Condition: ";
 
-void Relational_Expr_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) {
+	switch(relational_op) {
+		case greater_than_op   : file_buffer << "GT" ; break ;
+		case greater_equals_op : file_buffer << "GE" ; break ;
+		case less_than_op      : file_buffer << "LT" ; break ;
+		case less_equals_op    : file_buffer << "LE" ; break ;
+		case equals_op         : file_buffer << "EQ" ; break ;
+		case not_equals_op     : file_buffer << "NE" ; break ;
+		default : file_buffer << "nop" ; break ;
+	}
+	file_buffer << endl ;
 
+	file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+	lhs->print_ast(file_buffer);
+	file_buffer << ")\n";
+
+	file_buffer << AST_SUB_NODE_SPACE << "RHS (";
+	rhs->print_ast(file_buffer);
+	file_buffer << ")\n";
 }
 
 
@@ -36,16 +52,14 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	Eval_Result & lhsresult = lhs->evaluate(eval_env, file_buffer);
 	Eval_Result & rhsresult = rhs->evaluate(eval_env, file_buffer);
 
-	if (lhsresult.is_variable_defined())
+	if (!lhsresult.is_variable_defined())
 		report_error("Variable should be defined on LHS of comparison.", NOLINE);
-	if (rhsresult.is_variable_defined())
+	if (!rhsresult.is_variable_defined())
 		report_error("Variable should be defined on RHS of comparison.", NOLINE);
 
 
 	Eval_Result_Value_Int * result = new Eval_Result_Value_Int() ;
-	result->set_variable_status(lhsresult.is_variable_defined() && 
-								rhsresult.is_variable_defined()) ;
-
+	
 	bool value ;
 	switch(relational_op) {
 		case greater_than_op   : value = (lhsresult.get_value() >  rhsresult.get_value()); break ;
