@@ -277,7 +277,15 @@ If_Else_Ast::~If_Else_Ast()
 
 void If_Else_Ast::print_ast(ostream & file_buffer)
 {
-  
+  	Local_Environment eval_env ;
+  	file_buffer << AST_SPACE << "If_Else statement:\n";
+	condition->print_ast(file_buffer);
+	
+	file_buffer << AST_NODE_SPACE << "True Successor: " << if_goto->evaluate(eval_env,file_buffer).get_value();
+	file_buffer << "\n";
+
+	file_buffer << AST_NODE_SPACE << "False Successor: " << else_goto->evaluate(eval_env,file_buffer).get_value();
+	file_buffer << "\n";
 }
 
 Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) { 

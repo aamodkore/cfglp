@@ -18,9 +18,7 @@ Relational_Expr_Ast::Relational_Expr_Ast(Ast* temp_lhs, Relational_Operator opr,
 
 Relational_Expr_Ast::~Relational_Expr_Ast() {}
 
-Data_Type Relational_Expr_Ast::get_data_type() {
-	return int_data_type ;
-}
+Data_Type Relational_Expr_Ast::get_data_type() { return int_data_type ; }
 
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
