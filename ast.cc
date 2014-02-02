@@ -82,6 +82,7 @@ bool Assignment_Ast::check_ast(int line) {
 }
 
 void Assignment_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << "\n" ;
 	file_buffer << AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
@@ -130,7 +131,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) 
 	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
 
-	file_buffer << "\n" << AST_SPACE << variable_name << " : ";
+	file_buffer << AST_SPACE << variable_name << " : ";
 
 	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
 		file_buffer << "undefined";
@@ -230,6 +231,7 @@ void Return_Ast::print_ast(ostream & file_buffer) {
 }
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+	file_buffer << endl << AST_SPACE << "Return <NOTHING>" << endl;
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	return result;
 }
@@ -238,64 +240,69 @@ template class Number_Ast<int>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Goto_Ast::Goto_Ast() 
-{}
+Goto_Ast::Goto_Ast() {}
 
-Goto_Ast::Goto_Ast(int bb) 
-{
+Goto_Ast::Goto_Ast(int bb) {
   block_no = bb;
 }
 
-Goto_Ast::~Goto_Ast() 
-{}
+Goto_Ast::~Goto_Ast() {}
 
-void Goto_Ast::print_ast(ostream & file_buffer)
-{
-  file_buffer << AST_SPACE << "Goto statement:\n";
+void Goto_Ast::print_ast(ostream & file_buffer) {
+  file_buffer << endl << AST_SPACE << "Goto statement:\n";
   file_buffer << AST_NODE_SPACE << "Successor: " << block_no << "\n";
 }
 
+Eval_Result & Goto_Ast::get_value_of_evaluation(Local_Environment & eval_env) {
+	Eval_Result & result = *new Eval_Result_BB(block_no);
+	return result;
+}
+
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-  Eval_Result & result = *new Eval_Result_BB(block_no);
-  return result;
+	print_ast(file_buffer) ;
+	file_buffer << AST_SPACE << "GOTO (BB " << block_no << ")\n" ;
+	return get_value_of_evaluation(eval_env) ;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-If_Else_Ast::If_Else_Ast() 
-{}
+If_Else_Ast::If_Else_Ast() {}
 
-If_Else_Ast::If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g)  
-{
+If_Else_Ast::If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g) {
   condition = cond;
   if_goto = if_g;
   else_goto = else_g;
 }
 
-If_Else_Ast::~If_Else_Ast() 
-{}
+If_Else_Ast::~If_Else_Ast() {}
 
-void If_Else_Ast::print_ast(ostream & file_buffer)
-{
+void If_Else_Ast::print_ast(ostream & file_buffer) {
   	Local_Environment eval_env ;
-  	file_buffer << AST_SPACE << "If_Else statement:\n";
+  	file_buffer << AST_SPACE << "If_Else statement:";
 	condition->print_ast(file_buffer);
 	
-	file_buffer << AST_NODE_SPACE << "True Successor: " << if_goto->evaluate(eval_env,file_buffer).get_value();
+	file_buffer << endl << AST_NODE_SPACE << "True Successor: " << if_goto->get_value_of_evaluation(eval_env).get_value();
 	file_buffer << "\n";
 
-	file_buffer << AST_NODE_SPACE << "False Successor: " << else_goto->evaluate(eval_env,file_buffer).get_value();
+	file_buffer << AST_NODE_SPACE << "False Successor: " << else_goto->get_value_of_evaluation(eval_env).get_value();
 	file_buffer << "\n";
 }
 
 Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) { 
-  Eval_Result & cond = condition->evaluate(eval_env, file_buffer);
-  if(cond.get_value() == 1) {
-    return if_goto->evaluate(eval_env, file_buffer);
-  }
-  else {
-    return else_goto->evaluate(eval_env, file_buffer);
-  }
+	Eval_Result & cond = condition->evaluate(eval_env, file_buffer);
+	file_buffer << endl ;
+	print_ast(file_buffer) ;
+	if(cond.get_value() == 1) {
+		Eval_Result & eval = if_goto->get_value_of_evaluation(eval_env);
+		file_buffer << AST_SPACE << "Condition True : Goto (BB " << eval.get_value() << ")\n" ;
+		return eval ;
+	} else if (cond.get_value() == 0) {
+		Eval_Result & eval = else_goto->get_value_of_evaluation(eval_env);
+		file_buffer << AST_SPACE<< "Condition False : Goto (BB " << eval.get_value() << ")\n" ;
+		return eval ;
+	} else {
+		report_internal_error("condition evaluated should return only bool result") ;
+	}
 }
 
 

@@ -122,18 +122,20 @@ public:
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
+
+
 class Goto_Ast:public Ast 
 {
-  int block_no;
+ 	int block_no;
 
 public:
-  Goto_Ast();
-  Goto_Ast(int bb);
-  ~Goto_Ast();
+	Goto_Ast();
+	Goto_Ast(int bb);
+	~Goto_Ast();
 
-  void print_ast(ostream & file_buffer);
-  
-  Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	void print_ast(ostream & file_buffer);
+	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env) ;
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 
@@ -158,18 +160,18 @@ public:
 
 class If_Else_Ast:public Ast 
 {
-  Ast * condition;
-  Ast * if_goto;
-  Ast * else_goto;
+	Ast * condition;
+	Ast * if_goto;
+	Ast * else_goto;
 
 public:
-  If_Else_Ast();
-  If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g);
-  ~If_Else_Ast();
+	If_Else_Ast();
+	If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g);
+	~If_Else_Ast();
 
-  void print_ast(ostream & file_buffer);
-  
-  Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 

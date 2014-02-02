@@ -16,14 +16,17 @@ Relational_Expr_Ast::Relational_Expr_Ast(Ast* temp_lhs, Relational_Operator opr,
 	rhs = temp_rhs ;
 }
 
-Relational_Expr_Ast::~Relational_Expr_Ast() {}
+Relational_Expr_Ast::~Relational_Expr_Ast() {
+	if (!lhs) delete lhs ;
+	if (!rhs) delete rhs ;
+}
 
 Data_Type Relational_Expr_Ast::get_data_type() { return int_data_type ; }
 
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
 
-	file_buffer << AST_NODE_SPACE << "Condition: ";
+	file_buffer << endl << AST_NODE_SPACE << "Condition: ";
 
 	switch(relational_op) {
 		case greater_than_op   : file_buffer << "GT" ; break ;
@@ -42,7 +45,7 @@ void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
 
 	file_buffer << AST_SUB_NODE_SPACE << "RHS (";
 	rhs->print_ast(file_buffer);
-	file_buffer << ")\n";
+	file_buffer << ")";
 }
 
 
