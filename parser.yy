@@ -308,18 +308,18 @@ assignment_statement:
 
 if_else_statement :
         IF '(' relational_expression ')' 
-        goto_statement 
+        GOTO BB ';'
         ELSE 
-        goto_statement 
+        GOTO BB ';'
 	{
-		$$ = new If_Else_Ast($3, $5, $7);
+		$$ = new Conditional_Goto_Ast($3, $6, $10);
 	}
 ;
 
 goto_statement : 
         GOTO BB ';'
 	{
-		$$ = new Goto_Ast($2);
+		$$ = new Unconditional_Goto_Ast($2);
 	}
 		
 ;

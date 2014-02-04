@@ -126,15 +126,41 @@ public:
 
 class Goto_Ast:public Ast 
 {
- 	int block_no;
 
 public:
 	Goto_Ast();
-	Goto_Ast(int bb);
 	~Goto_Ast();
 
+	virtual void print_ast(ostream & file_buffer) = 0 ;
+	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+};
+
+
+class Unconditional_Goto_Ast: public Goto_Ast 
+{
+ 	int block_no;
+
+public:
+	Unconditional_Goto_Ast();
+	Unconditional_Goto_Ast(int bb);
+	~Unconditional_Goto_Ast();
+
 	void print_ast(ostream & file_buffer);
-	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env) ;
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Conditional_Goto_Ast: public Goto_Ast 
+{
+ 	Ast * condition ;
+ 	int if_goto;
+ 	int else_goto ;
+
+public:
+	Conditional_Goto_Ast();
+	Conditional_Goto_Ast(Ast* cond, int if_g, int else_g);
+	~Conditional_Goto_Ast();
+
+	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
@@ -154,23 +180,6 @@ public:
 	
 	void print_ast(ostream & file_buffer);
 	
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-};
-
-
-class If_Else_Ast:public Ast 
-{
-	Ast * condition;
-	Ast * if_goto;
-	Ast * else_goto;
-
-public:
-	If_Else_Ast();
-	If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g);
-	~If_Else_Ast();
-
-	void print_ast(ostream & file_buffer);
-
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
