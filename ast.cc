@@ -172,11 +172,10 @@ Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env) {
 
 void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result) {
 	Eval_Result_Value * i;
-	if (result.get_result_enum() == int_result)
-	{
+	if (result.get_result_enum() == int_result || result.get_result_enum() == bool_result) {
 		i = new Eval_Result_Value_Int();
 	 	i->set_value(result.get_value());
-	}
+	} 
 
 	if (eval_env.does_variable_exist(variable_name))
 		eval_env.put_variable_value(*i, variable_name);
@@ -274,7 +273,10 @@ If_Else_Ast::If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g) {
   else_goto = else_g;
 }
 
-If_Else_Ast::~If_Else_Ast() {}
+If_Else_Ast::~If_Else_Ast() {
+	if (!if_goto) delete if_goto ;
+	if (!else_goto) delete else_goto ;
+}
 
 void If_Else_Ast::print_ast(ostream & file_buffer) {
   	Local_Environment eval_env ;
@@ -292,13 +294,18 @@ Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file
 	Eval_Result & cond = condition->evaluate(eval_env, file_buffer);
 	file_buffer << endl ;
 	print_ast(file_buffer) ;
-	if(cond.get_value() == 1) {
+
+	if (cond.get_result_enum()!=bool_result) {
+		report_internal_error("condition evaluated should return only bool result") ;
+	} else if(cond.get_value() == 1) {
 		Eval_Result & eval = if_goto->get_value_of_evaluation(eval_env);
 		file_buffer << AST_SPACE << "Condition True : Goto (BB " << eval.get_value() << ")\n" ;
+		delete & cond ;
 		return eval ;
 	} else if (cond.get_value() == 0) {
 		Eval_Result & eval = else_goto->get_value_of_evaluation(eval_env);
 		file_buffer << AST_SPACE<< "Condition False : Goto (BB " << eval.get_value() << ")\n" ;
+		delete & cond ;
 		return eval ;
 	} else {
 		report_internal_error("condition evaluated should return only bool result") ;
