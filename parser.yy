@@ -44,7 +44,7 @@
 %token <integer_value> BB
 %token <string_value> NAME
 %token RETURN INTEGER IF ELSE GOTO
-%token GT LT GE LE NE EQ ASSIGN_OP
+%token ASSIGN_OP NE EQ LT LE GT GE
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -55,6 +55,12 @@
 %type <ast> assignment_statement
 %type <ast> if_else_statement
 %type <ast> goto_statement
+
+%type <ast> primary_expression
+%type <ast> identifier
+
+%type <ast> comparison_expression
+%type <rel_op> comparison_operator
 %type <ast> relational_expression
 %type <rel_op> relational_operator
 %type <ast> variable
@@ -318,41 +324,56 @@ goto_statement :
 		
 ;
 
-relational_expression :
-        relational_expression relational_operator variable
-	{
-		$$ = new Relational_Expr_Ast($1, $2, $3);
-	} 
-| 
-	relational_expression relational_operator constant
-	{
-		$$ = new Relational_Expr_Ast($1, $2, $3);
-	} 
-|	
-	variable
-	{
-		$$ = $1;
-	}
+identifier :
+	variable   	{ $$ = $1; }
 |
-	constant
-	{
-		$$ = $1;
-	}
+	constant	{ $$ = $1; }
 ;
 
-relational_operator :
-        GE    { $$ = greater_equals_op; } 
+primary_expression :
+	identifier	{ $$ = $1; }
+|	
+	'(' relational_expression ')'
+				{ $$ = $2; }
+;
+
+comparison_expression :
+        comparison_expression comparison_operator primary_expression
+	{
+		$$ = new Relational_Expr_Ast($1, $2, $3);
+	} 
+|
+	primary_expression
+			{ $$ = $1 ; }
+;
+
+relational_expression :
+        relational_expression relational_operator comparison_expression
+	{
+		$$ = new Relational_Expr_Ast($1, $2, $3);
+	} 
+|
+	comparison_expression
+			{ $$ = $1 ;}
+;
+
+
+comparison_operator :
+    GE    { $$ = greater_equals_op; } 
 | 
 	LE    { $$ = less_equals_op; }
 | 
 	GT    { $$ = greater_than_op; }
 | 
 	LT    { $$ = less_than_op; } 
-| 
+;
+
+relational_operator : 
 	EQ    { $$ = equals_op; }	
 | 
 	NE    { $$ = not_equals_op; }	 
 ;
+
 variable:
 	NAME
 	{
