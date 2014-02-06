@@ -330,25 +330,43 @@ identifier :
 	constant	{ $$ = $1; }
 ;
 
-primary_expression :
+primary_expression:
 	identifier	{ $$ = $1; }
 |	
 	'(' relational_expression ')'
 				{ $$ = $2; }
 ;
 
+unary_expression:
+	'-' primary_expression
+|
+	primary_expression
+;
+
+multiplicative_expression:
+	multiplicative_expression multiplicative_operator unary_expression
+|
+	unary_expression
+;
+
+additive_expression:
+	additive_expression additive_operator multiplicative_expression
+|
+	multiplicative_expression
+;
+
 comparison_expression :
-        comparison_expression comparison_operator primary_expression
+        comparison_expression comparison_operator additive_expression
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 	} 
 |
-	primary_expression
-			{ $$ = $1 ; }
+	additive_expression
+			{ $$ = $1 ;}
 ;
 
-relational_expression :
-        relational_expression relational_operator comparison_expression
+equality_expression :
+        equality_expression equality_operator comparison_expression
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 	} 
@@ -357,6 +375,17 @@ relational_expression :
 			{ $$ = $1 ;}
 ;
 
+multiplicative_operator:
+	MUL
+|
+	DIV
+;
+
+additive_operator:
+	ADD
+|
+	SUB
+;
 
 comparison_operator :
     GE    { $$ = greater_equals_op; } 
@@ -368,7 +397,7 @@ comparison_operator :
 	LT    { $$ = less_than_op; } 
 ;
 
-relational_operator : 
+equality_operator : 
 	EQ    { $$ = equals_op; }	
 | 
 	NE    { $$ = not_equals_op; }	 

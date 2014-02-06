@@ -86,7 +86,8 @@ goto		{
 "="			{
 				store_token_name("ASSIGN_OP");
 				return Parser::ASSIGN_OP;
-			}	
+			}
+	
 
 [:{}();]	{
 			store_token_name("META CHAR");
