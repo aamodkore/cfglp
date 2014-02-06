@@ -87,7 +87,10 @@ goto		{
 				store_token_name("ASSIGN_OP");
 				return Parser::ASSIGN_OP;
 			}
-	
+[+-/*]			{	
+				store_token_name("ARITH_OP");
+				return Parser::ARITH_OP;
+			}		
 
 [:{}();]	{
 			store_token_name("META CHAR");
@@ -104,6 +107,11 @@ goto		{
 				return Parser::INTEGER_NUMBER; 
 			}
 
+[-]?[0-9]+[.][0-9]+ {
+					store_token_name("FNUM");
+					return Parser::FLOAT_NUMBER;
+				 }	
+				 
 [[:alpha:]_][[:alpha:][:digit:]_]* {
 					store_token_name("NAME");
 

@@ -41,10 +41,12 @@
 };
 
 %token <integer_value> INTEGER_NUMBER
+%token FLOAT_NUMBER
 %token <integer_value> BB
 %token <string_value> NAME
 %token RETURN INTEGER IF ELSE GOTO
 %token ASSIGN_OP NE EQ LT LE GT GE
+%token ARITH_OP
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -59,12 +61,14 @@
 %type <ast> primary_expression
 %type <ast> identifier
 
+/*
 %type <ast> comparison_expression
 %type <rel_op> comparison_operator
 %type <ast> relational_expression
 %type <rel_op> relational_operator
 %type <ast> variable
 %type <ast> constant
+*/
 
 %start program
 
@@ -297,7 +301,7 @@ assignment_statement_list:
 ;
 
 assignment_statement:
-	variable ASSIGN_OP relational_expression ';' 
+	variable ASSIGN_OP expression ';' 
 	{
 		$$ = new Assignment_Ast($1, $3);
 
@@ -307,7 +311,7 @@ assignment_statement:
 ;
 
 if_else_statement :
-        IF '(' relational_expression ')' 
+        IF '(' expression ')' 
         goto_statement 
         ELSE 
         goto_statement 
@@ -333,7 +337,7 @@ identifier :
 primary_expression:
 	identifier	{ $$ = $1; }
 |	
-	'(' relational_expression ')'
+	'('expression')'
 				{ $$ = $2; }
 ;
 
@@ -375,16 +379,19 @@ equality_expression :
 			{ $$ = $1 ;}
 ;
 
-multiplicative_operator:
-	MUL
+
+expression: equality_expression
+;
+multiplicative_operator : 
+	'*'
 |
-	DIV
+	'/'
 ;
 
 additive_operator:
-	ADD
+	'+'
 |
-	SUB
+	'-'
 ;
 
 comparison_operator :
