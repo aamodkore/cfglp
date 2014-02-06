@@ -56,6 +56,7 @@ goto		{
 				ParserBase::STYPE__ * val = getSval();
 				matched().substr(4, matched().find(">") - 4);
 				val->integer_value = atoi(matched().substr(4, matched().find(">") - 4).c_str());
+				if (val->integer_value < 2) report_error("Invalid Block Label", lineNr()) ;
 				return Parser::BB;
 			}
 

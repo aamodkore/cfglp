@@ -56,10 +56,12 @@ parser.cc parserbase.h: parser.yy parser.ih parser.h
 	$(BISONCPP) --verbose parser.yy
 
 clean :
-	rm -rf *.o cfglp scannerbase.h parserbase.h scanner.cc parser.cc parser.yy.output
-	rm -rf cscope.out tags a.out
+	rm -rf cfglp scannerbase.h parserbase.h scanner.cc parser.cc parser.yy.output
+	rm -rf *.o *.d tags *.out *.tgz
 	
 submit : clean
 	mkdir -p $(SUBMIT_DIR)
-	cp *.hh *.cc *.h *.ih *.ll *.yy Makefile* $(SUBMIT_DIR)
+	cp -r *.hh *.cc *.h *.ih *.ll *.yy Makefile* *64* test_files submit/* $(SUBMIT_DIR)
+	tar zcvf $(SUBMIT_DIR).tgz $(SUBMIT_DIR)
+	rm -rf $(SUBMIT_DIR)
    
