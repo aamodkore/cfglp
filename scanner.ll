@@ -30,6 +30,14 @@ int		{
 			store_token_name("INTEGER");
 			return Parser::INTEGER; 
 		}
+float		{
+			store_token_name("META CHAR");
+			return Parser::FLOAT; 
+		}
+double		{
+			store_token_name("META CHAR");
+			return Parser::DOUBLE; 
+		}
 
 return		{ 
 			store_token_name("RETURN");
@@ -87,15 +95,16 @@ goto		{
 				store_token_name("ASSIGN_OP");
 				return Parser::ASSIGN_OP;
 			}
-[+-/*]			{	
-				store_token_name("ARITH_OP");
-				return Parser::ARITH_OP;
-			}		
+[-+*/]			{
+				store_token_name("ARITHOP");
+				return matched()[0];
+			}
 
 [:{}();]	{
 			store_token_name("META CHAR");
 			return matched()[0];
 		}
+
 
 
 [-]?[[:digit:]_]+ 	{ 
@@ -126,6 +135,7 @@ goto		{
 				ignore_token();
 		}    
 
+"//".* 		|
 ";;".*  	|
 [ \t]		{
 			if (command_options.is_show_tokens_selected())

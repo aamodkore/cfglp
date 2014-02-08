@@ -123,6 +123,10 @@ Basic_Block * Procedure::get_next_bb(int bb_no)
       return (*i);
     }
   }
+  // BB No does not exist. Report Error.
+  char err_msg[30];
+  sprintf(err_msg, "bb %d doesn't exist\n", bb_no);
+  report_error(err_msg, NOLINE);
 }
 
 Eval_Result & Procedure::evaluate(ostream & file_buffer)

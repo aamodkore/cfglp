@@ -80,7 +80,7 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 		report_error("Variable should be defined on RHS of comparison.", NOLINE);
 
 
-	Eval_Result_Value_Int * result = new Eval_Result_Value_Int() ;
+	Eval_Result_Value_Bool * result = new Eval_Result_Value_Bool() ;
 	
 	bool value ;
 	switch(relational_op) {
@@ -94,5 +94,8 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	}
 
 	result->set_value(value?1:0) ;
+
+	// delete & lhsresult ;
+	// delete & rhsresult ;
 	return *result;
 }

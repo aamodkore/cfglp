@@ -29,6 +29,7 @@
 %union 
 {
 	int integer_value;
+	float float_value;
 	std::string * string_value;
 	list<Ast *> * ast_list;
 	Ast * ast;
@@ -41,12 +42,11 @@
 };
 
 %token <integer_value> INTEGER_NUMBER
-%token FLOAT_NUMBER
 %token <integer_value> BB
+%token <float_value> FLOAT_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER IF ELSE GOTO
+%token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO
 %token ASSIGN_OP NE EQ LT LE GT GE
-%token ARITH_OP
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -58,17 +58,19 @@
 %type <ast> if_else_statement
 %type <ast> goto_statement
 
-%type <ast> primary_expression
+%type <ast> expression
 %type <ast> identifier
-
-/*
+%type <ast> primary_expression
+%type <ast> unary_expression
+%type <ast> multiplicative_expression
+%type <ast> additive_expression
 %type <ast> comparison_expression
+%type <ast> equality_expression
+
 %type <rel_op> comparison_operator
-%type <ast> relational_expression
-%type <rel_op> relational_operator
+%type <rel_op> equality_operator
 %type <ast> variable
 %type <ast> constant
-*/
 
 %start program
 
@@ -198,6 +200,12 @@ declaration_statement:
 		$$ = new Symbol_Table_Entry(*$2, int_data_type);
 		delete $2;
 	}
+|
+	FLOAT NAME ';'
+	{
+		$$ = new Symbol_Table_Entry(*$2, int_data_type);
+		delete $2;
+	}
 ;
 
 basic_block_list:
@@ -303,27 +311,29 @@ assignment_statement_list:
 assignment_statement:
 	variable ASSIGN_OP expression ';' 
 	{
+		#if 0
 		$$ = new Assignment_Ast($1, $3);
 
 		int line = get_line_number();
 		$$->check_ast(line);
+		#endif
 	}
 ;
 
-if_else_statement :
+if_else_statement: 
         IF '(' expression ')' 
-        goto_statement 
+        GOTO BB ';'
         ELSE 
-        goto_statement 
+        GOTO BB ';'
 	{
-		$$ = new If_Else_Ast($3, $5, $7);
+		$$ = new Conditional_Goto_Ast($3, $6, $10);
 	}
 ;
 
 goto_statement : 
         GOTO BB ';'
 	{
-		$$ = new Goto_Ast($2);
+		$$ = new Unconditional_Goto_Ast($2);
 	}
 		
 ;
@@ -337,7 +347,7 @@ identifier :
 primary_expression:
 	identifier	{ $$ = $1; }
 |	
-	'('expression')'
+	'(' expression ')'
 				{ $$ = $2; }
 ;
 
@@ -345,6 +355,12 @@ unary_expression:
 	'-' primary_expression
 |
 	primary_expression
+| 
+	'(' FLOAT ')' unary_expression
+|
+	'(' INTEGER ')' unary_expression
+|
+	'(' DOUBLE ')' unary_expression
 ;
 
 multiplicative_expression:
@@ -379,14 +395,15 @@ equality_expression :
 			{ $$ = $1 ;}
 ;
 
-
 expression: equality_expression
 ;
+
 multiplicative_operator : 
 	'*'
 |
 	'/'
 ;
+
 
 additive_operator:
 	'+'
@@ -436,6 +453,11 @@ variable:
 constant:
 	INTEGER_NUMBER
 	{
-		$$ = new Number_Ast<int>($1, int_data_type);
+		//$$ = new Number_Ast<int>($1, int_data_type);
+	}
+|
+	FLOAT_NUMBER
+	{
+		//$$ = new Number_Ast<int>($1, int_data_type);
 	}
 ;
