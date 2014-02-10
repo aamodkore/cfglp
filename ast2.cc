@@ -99,3 +99,129 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	// delete & rhsresult ;
 	return *result;
 }
+/********************************************************************************/
+Arithmetic_Expr_Ast::Arithmetic_Expr_Ast() {}
+
+Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {}
+
+bool Arithmetic_Expr_Ast::check_ast(int line) {
+	if (lhs->get_data_type() == rhs->get_data_type())
+	{
+		node_data_type = lhs->get_data_type();
+		return true;
+	}
+
+	report_error("Arithmetic statement data type not compatible", line);
+}
+
+Data_Type Arithmetic_Expr_Ast::get_data_type() {
+  return node_data_type;
+}
+
+/******************************************************************************/
+
+Plus_Ast::Plus_Ast(Ast * l, Ast * r) {
+  lhs = l;
+  rhs = r;
+}
+
+Plus_Ast::~Plus_Ast() {}
+
+Data_Type Plus_Ast::get_data_type() {
+  return node_data_type;
+}
+
+void Plus_Ast::print_ast(ostream & file_buffer) {
+  
+}
+
+Eval_Result & Plus_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+}
+  
+/**********************************************************************************/
+
+Minus_Ast::Minus_Ast(Ast * l, Ast * r) {
+  lhs = l;
+  rhs = r;
+}
+
+Minus_Ast::~Minus_Ast() {}
+
+Data_Type Minus_Ast::get_data_type() {
+  return node_data_type;
+}
+
+void Minus_Ast::print_ast(ostream & file_buffer) {
+  
+}
+
+Eval_Result & Minus_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+}
+/**********************************************************************************/
+
+Multiplication_Ast::Multiplication_Ast(Ast * l, Ast * r) {
+  lhs = l;
+  rhs = r;
+}
+
+Multiplication_Ast::~Multiplication_Ast() {}
+
+Data_Type Multiplication_Ast::get_data_type() {
+  return node_data_type;
+}
+
+void Multiplication_Ast::print_ast(ostream & file_buffer) {
+  
+}
+
+Eval_Result & Multiplication_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+}
+/**********************************************************************************/
+
+Division_Ast::Division_Ast(Ast * l, Ast * r) {
+  lhs = l;
+  rhs = r;
+}
+
+Division_Ast::~Division_Ast() {}
+
+Data_Type Division_Ast::get_data_type() {
+  return node_data_type;
+}
+
+void Division_Ast::print_ast(ostream & file_buffer) {
+  
+}
+
+Eval_Result & Division_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+}
+/**********************************************************************************/
+
+Unary_Ast::Unary_Ast(Ast * r) {
+  lhs = NULL;
+  rhs = r;
+}
+
+Unary_Ast::~Unary_Ast() {}
+
+bool Unary_Ast::check_ast(int line) {
+  if(rhs->get_data_type() == int_data_type || rhs->get_data_type() == float_data_type ){
+    node_data_type = rhs->get_data_type();
+    return true;
+  }
+  report_error("Unary expression data type not compatible", line);
+}
+
+Data_Type Unary_Ast::get_data_type() {
+  return node_data_type;
+}
+
+void Unary_Ast::print_ast(ostream & file_buffer) {
+  
+}
+
+Eval_Result & Unary_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+}
+/***********************************************************************************/
+
+

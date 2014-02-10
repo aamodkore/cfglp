@@ -184,4 +184,88 @@ public:
 };
 
 
+class Arithmetic_Expr_Ast:public Ast
+{
+protected:
+  Ast * lhs;
+  Ast * rhs;
+public:
+	Arithmetic_Expr_Ast() ;
+	~Arithmetic_Expr_Ast() ;
+
+	virtual Data_Type get_data_type();
+	bool check_ast(int line);
+	virtual void print_ast(ostream & file_buffer) = 0;
+	
+	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+};
+
+
+class Plus_Ast:public Arithmetic_Expr_Ast
+{
+  public:
+  Plus_Ast(Ast * l, Ast * r) ;
+	~Plus_Ast() ;
+
+	 Data_Type get_data_type();
+ 
+	 void print_ast(ostream & file_buffer);
+	
+	 Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Minus_Ast:public Arithmetic_Expr_Ast
+{
+
+public:
+  Minus_Ast(Ast * l, Ast * r) ;
+	~Minus_Ast() ;
+
+	Data_Type get_data_type();
+	
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+};
+
+class Multiplication_Ast:public Arithmetic_Expr_Ast
+{
+public:
+  Multiplication_Ast(Ast * l, Ast * r) ;
+	~Multiplication_Ast() ;
+
+	Data_Type get_data_type();
+	void print_ast(ostream & file_buffer);
+	
+        Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Division_Ast:public Arithmetic_Expr_Ast
+{
+
+public:
+  Division_Ast(Ast * l, Ast * r) ;
+	~Division_Ast() ;
+
+	 Data_Type get_data_type();
+  
+	 void print_ast(ostream & file_buffer);
+	
+	 Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Unary_Ast:public Arithmetic_Expr_Ast
+{
+public:
+	Unary_Ast(Ast * r) ;
+	~Unary_Ast() ;
+
+        Data_Type get_data_type();
+	
+	void print_ast(ostream & file_buffer);
+  
+        bool check_ast(int line);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
 #endif

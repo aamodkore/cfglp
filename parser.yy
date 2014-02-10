@@ -64,6 +64,7 @@
 %type <ast> unary_expression
 %type <ast> multiplicative_expression
 %type <ast> additive_expression
+%type <ast> arithmetic_expression
 %type <ast> comparison_expression
 %type <ast> equality_expression
 
@@ -347,41 +348,47 @@ identifier :
 primary_expression:
 	identifier	{ $$ = $1; }
 |	
-	'(' expression ')'
+	'(' arithmetic_expression ')'
 				{ $$ = $2; }
 ;
 
 unary_expression:
-	'-' primary_expression
+	'-' primary_expression { $$ = $2; } 
 |
-	primary_expression
+	primary_expression { $$ = $1; } 
 | 
-	'(' FLOAT ')' unary_expression
+	'(' FLOAT ')' unary_expression {$$ = $4; }
 |
-	'(' INTEGER ')' unary_expression
+	'(' INTEGER ')' unary_expression { $$ = $4; }
 |
-	'(' DOUBLE ')' unary_expression
+	'(' DOUBLE ')' unary_expression {$$ = $4; }
 ;
 
 multiplicative_expression:
-	multiplicative_expression multiplicative_operator unary_expression
+	multiplicative_expression '*' unary_expression
+|
+	multiplicative_expression '/' unary_expression
 |
 	unary_expression
 ;
 
 additive_expression:
-	additive_expression additive_operator multiplicative_expression
+	additive_expression '+'  multiplicative_expression
 |
+	additive_expression '-'  multiplicative_expression
+|	
 	multiplicative_expression
 ;
 
+arithmetic_expression : additive_expression;
+
 comparison_expression :
-        comparison_expression comparison_operator additive_expression
+        comparison_expression comparison_operator arithmetic_expression
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 	} 
 |
-	additive_expression
+	arithmetic_expression
 			{ $$ = $1 ;}
 ;
 
@@ -398,18 +405,6 @@ equality_expression :
 expression: equality_expression
 ;
 
-multiplicative_operator : 
-	'*'
-|
-	'/'
-;
-
-
-additive_operator:
-	'+'
-|
-	'-'
-;
 
 comparison_operator :
     GE    { $$ = greater_equals_op; } 
@@ -453,11 +448,11 @@ variable:
 constant:
 	INTEGER_NUMBER
 	{
-		//$$ = new Number_Ast<int>($1, int_data_type);
+		$$ = new Number_Ast<int>($1, int_data_type);
 	}
 |
 	FLOAT_NUMBER
 	{
-		//$$ = new Number_Ast<int>($1, int_data_type);
+		$$ = new Number_Ast<float>($1, float_data_type);
 	}
 ;
