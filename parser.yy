@@ -348,7 +348,7 @@ identifier :
 primary_expression:
 	identifier	{ $$ = $1; }
 |	
-	'(' arithmetic_expression ')'
+	'(' expression ')'
 				{ $$ = $2; }
 ;
 
