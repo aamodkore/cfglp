@@ -107,7 +107,7 @@ goto		{
 
 
 
-[-]?[[:digit:]_]+ 	{ 
+[-]?[0-9]+ 	{ 
 				store_token_name("NUM");
 
 				ParserBase::STYPE__ * val = getSval();
