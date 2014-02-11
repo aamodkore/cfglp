@@ -1,0 +1,25 @@
+************************************************************************
+CS 306 - Assignment 2b
+
+	S S Kausik	110050003
+	Aamod Kore	110050004
+
+************************************************************************
+
+Changes done after assignment 2a :
+
+1.	Created classes for  Relational_Expr_Ast, Conditional_Got_Ast, 
+	Unconditional_Goto_Ast, Eval_Result_BB and Eval_Result_Value_Bool. 
+	The AST classes are created for the corresponding AST types, which 
+	might be created as a result of the Level-1 CFG grammar. 
+	
+2.	The Eval_Result_BB and Eval_Result_Value_Bool classes are derived 
+	from Eval_Result and Eval_Result_Value classes respectively and are 
+	made to return the results of GOTO statements and relational 
+	expressions respectively.
+
+3.	Modified the parser.yy file to add the actions corresponding to the 
+	tokens, to create the corresponding ASTs. Also added a few tokens to 
+	make the grammar more easy to read for future parts.
+	
+************************************************************************

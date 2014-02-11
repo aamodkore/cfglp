@@ -126,15 +126,41 @@ public:
 
 class Goto_Ast:public Ast 
 {
- 	int block_no;
 
 public:
 	Goto_Ast();
-	Goto_Ast(int bb);
 	~Goto_Ast();
 
+	virtual void print_ast(ostream & file_buffer) = 0 ;
+	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+};
+
+
+class Unconditional_Goto_Ast: public Goto_Ast 
+{
+ 	int block_no;
+
+public:
+	Unconditional_Goto_Ast();
+	Unconditional_Goto_Ast(int bb);
+	~Unconditional_Goto_Ast();
+
 	void print_ast(ostream & file_buffer);
-	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env) ;
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Conditional_Goto_Ast: public Goto_Ast 
+{
+ 	Ast * condition ;
+ 	int if_goto;
+ 	int else_goto ;
+
+public:
+	Conditional_Goto_Ast();
+	Conditional_Goto_Ast(Ast* cond, int if_g, int else_g);
+	~Conditional_Goto_Ast();
+
+	void print_ast(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
@@ -158,21 +184,88 @@ public:
 };
 
 
-class If_Else_Ast:public Ast 
+class Arithmetic_Expr_Ast:public Ast
 {
-	Ast * condition;
-	Ast * if_goto;
-	Ast * else_goto;
-
+protected:
+  Ast * lhs;
+  Ast * rhs;
 public:
-	If_Else_Ast();
-	If_Else_Ast(Ast* cond, Ast* if_g, Ast* else_g);
-	~If_Else_Ast();
+	Arithmetic_Expr_Ast() ;
+	~Arithmetic_Expr_Ast() ;
 
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	virtual Data_Type get_data_type();
+	bool check_ast(int line);
+	virtual void print_ast(ostream & file_buffer) = 0;
+	
+	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 };
 
+
+class Plus_Ast:public Arithmetic_Expr_Ast
+{
+  public:
+  Plus_Ast(Ast * l, Ast * r) ;
+	~Plus_Ast() ;
+
+	 Data_Type get_data_type();
+ 
+	 void print_ast(ostream & file_buffer);
+	
+	 Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Minus_Ast:public Arithmetic_Expr_Ast
+{
+
+public:
+  Minus_Ast(Ast * l, Ast * r) ;
+	~Minus_Ast() ;
+
+	Data_Type get_data_type();
+	
+	void print_ast(ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+};
+
+class Multiplication_Ast:public Arithmetic_Expr_Ast
+{
+public:
+  Multiplication_Ast(Ast * l, Ast * r) ;
+	~Multiplication_Ast() ;
+
+	Data_Type get_data_type();
+	void print_ast(ostream & file_buffer);
+	
+        Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Division_Ast:public Arithmetic_Expr_Ast
+{
+
+public:
+  Division_Ast(Ast * l, Ast * r) ;
+	~Division_Ast() ;
+
+	 Data_Type get_data_type();
+  
+	 void print_ast(ostream & file_buffer);
+	
+	 Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Unary_Ast:public Arithmetic_Expr_Ast
+{
+public:
+	Unary_Ast(Ast * r) ;
+	~Unary_Ast() ;
+
+        Data_Type get_data_type();
+	
+	void print_ast(ostream & file_buffer);
+  
+        bool check_ast(int line);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
 
 #endif

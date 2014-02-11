@@ -30,6 +30,14 @@ int		{
 			store_token_name("INTEGER");
 			return Parser::INTEGER; 
 		}
+float		{
+			store_token_name("FLOAT");
+			return Parser::FLOAT; 
+		}
+double		{
+			store_token_name("DOUBLE");
+			return Parser::DOUBLE; 
+		}
 
 return		{ 
 			store_token_name("RETURN");
@@ -56,6 +64,7 @@ goto		{
 				ParserBase::STYPE__ * val = getSval();
 				matched().substr(4, matched().find(">") - 4);
 				val->integer_value = atoi(matched().substr(4, matched().find(">") - 4).c_str());
+				if (val->integer_value < 2) report_error("Invalid Block Label", lineNr()) ;
 				return Parser::BB;
 			}
 
@@ -86,7 +95,11 @@ goto		{
 "="			{
 				store_token_name("ASSIGN_OP");
 				return Parser::ASSIGN_OP;
-			}	
+			}
+[-+*/]			{
+				store_token_name("ARITHOP");
+				return matched()[0];
+			}
 
 [:{}();]	{
 			store_token_name("META CHAR");
@@ -94,7 +107,8 @@ goto		{
 		}
 
 
-[-]?[[:digit:]_]+ 	{ 
+
+[-]?[0-9]+ 	{ 
 				store_token_name("NUM");
 
 				ParserBase::STYPE__ * val = getSval();
@@ -103,6 +117,13 @@ goto		{
 				return Parser::INTEGER_NUMBER; 
 			}
 
+[-]?[0-9]+[.][0-9]+ {
+					store_token_name("FNUM");
+					ParserBase::STYPE__ * val = getSval();
+					val->float_value = atof(matched().c_str());
+					return Parser::FLOAT_NUMBER;
+				 }	
+				 
 [[:alpha:]_][[:alpha:][:digit:]_]* {
 					store_token_name("NAME");
 
@@ -117,6 +138,7 @@ goto		{
 				ignore_token();
 		}    
 
+"//".* 		|
 ";;".*  	|
 [ \t]		{
 			if (command_options.is_show_tokens_selected())

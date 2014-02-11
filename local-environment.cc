@@ -92,6 +92,92 @@ Result_Enum Eval_Result_Value_Int::get_result_enum()
 {
 	return result_type;
 }
+///////////////////////////////////////////////////////////////////////////////
+
+Eval_Result_Value_Float::Eval_Result_Value_Float()
+{
+	value = 0.0;
+	defined = false;
+	result_type = int_result;
+}
+
+Eval_Result_Value_Float::~Eval_Result_Value_Float()
+{ }
+
+void Eval_Result_Value_Float::set_value(float number)
+{
+	value = number;
+	defined = true;
+}
+/*
+int Eval_Result_Value_Float::get_value()
+{
+	return value;
+}
+*/
+
+void Eval_Result_Value_Float::set_variable_status(bool def)
+{
+	defined = def;
+}
+
+bool Eval_Result_Value_Float::is_variable_defined()
+{
+	return defined;
+}
+
+void Eval_Result_Value_Float::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+Result_Enum Eval_Result_Value_Float::get_result_enum()
+{
+	return result_type;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+Eval_Result_Value_Bool::Eval_Result_Value_Bool()
+{
+	value = false;
+	defined = false;
+	result_type = bool_result;
+}
+
+Eval_Result_Value_Bool::~Eval_Result_Value_Bool()
+{ }
+
+void Eval_Result_Value_Bool::set_value(int number)
+{
+	value = (number!=0) ;
+	defined = true;
+}
+
+int Eval_Result_Value_Bool::get_value()
+{
+	return value?1:0;
+}
+
+void Eval_Result_Value_Bool::set_variable_status(bool def)
+{
+	defined = def;
+}
+
+bool Eval_Result_Value_Bool::is_variable_defined()
+{
+	return defined;
+}
+
+void Eval_Result_Value_Bool::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+Result_Enum Eval_Result_Value_Bool::get_result_enum()
+{
+	return result_type;
+}
 ///////////////////////////////////////////////////////////////////////////////////
 
 Eval_Result_BB::Eval_Result_BB()
@@ -168,8 +254,9 @@ void Local_Environment::print(ostream & file_buffer)
 bool Local_Environment::is_variable_defined(string name)
 {
 	Eval_Result_Value * i = variable_table[name];
-	if (i != NULL)
+	if (i != NULL) {
 		return i->is_variable_defined();
+	}
 	else
 		return false;
 }

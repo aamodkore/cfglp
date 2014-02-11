@@ -35,7 +35,9 @@ using namespace std;
 typedef enum
 {
 	int_result,
+	float_result,
 	void_result,
+	bool_result,
 	bb_result
 } Result_Enum;
 
@@ -88,6 +90,47 @@ public:
 	void set_result_enum(Result_Enum res);
 	Result_Enum get_result_enum();
 };
+
+class Eval_Result_Value_Float:public Eval_Result_Value
+{
+	float value;
+	bool defined;
+public:
+	Eval_Result_Value_Float();
+	~Eval_Result_Value_Float();
+
+	void set_value(float number);
+  // float get_value();
+
+	void set_variable_status(bool def);
+	bool is_variable_defined();
+
+	void set_result_enum(Result_Enum res);
+	Result_Enum get_result_enum();
+};
+
+
+
+class Eval_Result_Value_Bool:public Eval_Result_Value
+{
+	bool value;
+	bool defined;
+public:
+	Eval_Result_Value_Bool();
+	~Eval_Result_Value_Bool();
+
+	void set_value(int number);
+	int get_value();
+
+	void set_variable_status(bool def);
+	bool is_variable_defined();
+
+	void set_result_enum(Result_Enum res);
+	Result_Enum get_result_enum();
+};
+
+
+
 
 class Eval_Result_BB:public Eval_Result
 {
