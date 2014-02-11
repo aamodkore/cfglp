@@ -353,15 +353,15 @@ primary_expression:
 ;
 
 unary_expression:
-	'-' primary_expression { $$ = $2; } 
+	'-' unary_expression { $$ = $2; } 
 |
-	primary_expression { $$ = $1; } 
-| 
 	'(' FLOAT ')' unary_expression {$$ = $4; }
 |
 	'(' INTEGER ')' unary_expression { $$ = $4; }
 |
 	'(' DOUBLE ')' unary_expression {$$ = $4; }
+|
+	primary_expression { $$ = $1; } 
 ;
 
 multiplicative_expression:
