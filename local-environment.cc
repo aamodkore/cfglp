@@ -35,9 +35,19 @@ int Eval_Result::get_value()
 	report_internal_error("Should not reach, Eval_Result : get_value");
 }
 
+float Eval_Result::get_value_float()
+{
+	report_internal_error("Should not reach, Eval_Result : get_value_float");
+}
+
 void Eval_Result::set_value(int number)
 {
 	report_internal_error("Should not reach, Eval_Result : set_value");
+}
+
+void Eval_Result::set_value_float(float number)
+{
+	report_internal_error("Should not reach, Eval_Result : set_value_float");
 }
 
 bool Eval_Result::is_variable_defined()
@@ -49,6 +59,28 @@ void Eval_Result::set_variable_status(bool def)
 {
 	report_internal_error("Should not reach, Eval_Result : set_variable_status");
 }
+///////////////////////////////////////////////////////////////////////////////////
+
+int Eval_Result_Value::get_value()
+{
+	report_internal_error("Should not reach, Eval_Result_Value : get_value");
+}
+
+float Eval_Result_Value::get_value_float()
+{
+	report_internal_error("Should not reach, Eval_Result_Value : get_value_float");
+}
+
+void Eval_Result_Value::set_value(int number)
+{
+	report_internal_error("Should not reach, Eval_Result_Value : set_value");
+}
+
+void Eval_Result_Value::set_value_float(float number)
+{
+	report_internal_error("Should not reach, Eval_Result_Value : set_float");
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,6 +88,13 @@ Eval_Result_Value_Int::Eval_Result_Value_Int()
 {
 	value = 0;
 	defined = false;
+	result_type = int_result;
+}
+
+Eval_Result_Value_Int::Eval_Result_Value_Int(int n)
+{
+	value = n;
+	defined = true;
 	result_type = int_result;
 }
 
@@ -98,23 +137,29 @@ Eval_Result_Value_Float::Eval_Result_Value_Float()
 {
 	value = 0.0;
 	defined = false;
-	result_type = int_result;
+	result_type = float_result;
+}
+
+Eval_Result_Value_Float::Eval_Result_Value_Float(float n)
+{
+	value = n;
+	defined = true;
+	result_type = float_result;
 }
 
 Eval_Result_Value_Float::~Eval_Result_Value_Float()
 { }
 
-void Eval_Result_Value_Float::set_value(float number)
+void Eval_Result_Value_Float::set_value_float(float number)
 {
 	value = number;
 	defined = true;
 }
-/*
-int Eval_Result_Value_Float::get_value()
+
+float Eval_Result_Value_Float::get_value_float()
 {
 	return value;
 }
-*/
 
 void Eval_Result_Value_Float::set_variable_status(bool def)
 {
@@ -245,8 +290,11 @@ void Local_Environment::print(ostream & file_buffer)
 			if (vi->is_variable_defined() == false)
 				file_buffer << VAR_SPACE << (*i).first << " : undefined" << "\n";
 		
-			else
+			else if(vi->get_result_enum() == int_result) 
 				file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value() << "\n";
+			
+			else if(vi->get_result_enum() == float_result) 
+			        file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value_float() << "\n";
 		}
 	}
 }

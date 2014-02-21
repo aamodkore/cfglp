@@ -50,7 +50,9 @@ protected:
 
 public:
 	virtual int get_value();
+  virtual float get_value_float();    
 	virtual void set_value(int value);
+        virtual void set_value_float(float value);
 
 	virtual bool is_variable_defined();
 	virtual void set_variable_status(bool def);
@@ -62,9 +64,11 @@ public:
 class Eval_Result_Value:public Eval_Result
 {
 public:
-	virtual void set_value(int number) = 0;
-	virtual int get_value() = 0;
-
+	virtual void set_value(int number);
+  virtual void set_value_float(float value);
+  
+	virtual int get_value() ;
+  virtual float get_value_float() ;
 	virtual bool is_variable_defined() = 0;
 	virtual void set_variable_status(bool def) = 0;
 
@@ -78,7 +82,8 @@ class Eval_Result_Value_Int:public Eval_Result_Value
 	bool defined;
 public:
 	Eval_Result_Value_Int();
-	~Eval_Result_Value_Int();
+  Eval_Result_Value_Int(int n);
+  ~Eval_Result_Value_Int();
 
 	void set_value(int number);
 	int get_value();
@@ -96,10 +101,11 @@ class Eval_Result_Value_Float:public Eval_Result_Value
 	bool defined;
 public:
 	Eval_Result_Value_Float();
+  Eval_Result_Value_Float(float n);
 	~Eval_Result_Value_Float();
 
-	void set_value(float number);
-  // float get_value();
+	void set_value_float(float number);
+  float get_value_float();
 
 	void set_variable_status(bool def);
 	bool is_variable_defined();

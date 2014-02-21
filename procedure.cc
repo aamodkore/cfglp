@@ -146,7 +146,13 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 	{
 	  result = &(current_bb->evaluate(eval_env, file_buffer));
 	  if( result->get_result_enum() == bb_result ) {
-	    current_bb = get_next_bb(result->get_value()); 
+	    if(result->get_value() < 0) {
+	      // Return statement will have a negative block number as result;
+	      break;
+	    }
+	    else {
+	      current_bb = get_next_bb(result->get_value()); 
+	    }
 	  }
 	  else {
 	    current_bb = get_next_bb(*current_bb);	

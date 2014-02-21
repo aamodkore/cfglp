@@ -20,6 +20,7 @@
 ***********************************************************************************************/
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 using namespace std;
@@ -83,14 +84,27 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	Eval_Result_Value_Bool * result = new Eval_Result_Value_Bool() ;
 	
 	bool value ;
-	switch(relational_op) {
-		case greater_than_op   : value = (lhsresult.get_value() >  rhsresult.get_value()); break ;
-		case greater_equals_op : value = (lhsresult.get_value() >= rhsresult.get_value()); break ;
-		case less_than_op      : value = (lhsresult.get_value() <  rhsresult.get_value()); break ;
-		case less_equals_op    : value = (lhsresult.get_value() <= rhsresult.get_value()); break ;
-		case equals_op         : value = (lhsresult.get_value() == rhsresult.get_value()); break ;
-		case not_equals_op     : value = (lhsresult.get_value() != rhsresult.get_value()); break ;
-		default : value = false ;
+	if(lhsresult.get_result_enum() == int_result || lhsresult.get_result_enum() == bool_result) {
+		switch(relational_op) {
+			case greater_than_op   : value = (lhsresult.get_value() >  rhsresult.get_value()); break ;
+			case greater_equals_op : value = (lhsresult.get_value() >= rhsresult.get_value()); break ;
+			case less_than_op      : value = (lhsresult.get_value() <  rhsresult.get_value()); break ;
+			case less_equals_op    : value = (lhsresult.get_value() <= rhsresult.get_value()); break ;
+			case equals_op         : value = (lhsresult.get_value() == rhsresult.get_value()); break ;
+			case not_equals_op     : value = (lhsresult.get_value() != rhsresult.get_value()); break ;
+			default : value = false ;
+		}
+	}
+	else if(lhsresult.get_result_enum() == float_result) {
+		switch(relational_op) {
+                        case greater_than_op   : value = (lhsresult.get_value_float() >  rhsresult.get_value_float()); break ;
+                        case greater_equals_op : value = (lhsresult.get_value_float() >= rhsresult.get_value_float()); break ;
+                        case less_than_op      : value = (lhsresult.get_value_float() <  rhsresult.get_value_float()); break ;
+                        case less_equals_op    : value = (lhsresult.get_value_float() <= rhsresult.get_value_float()); break ; 
+                        case equals_op         : value = (lhsresult.get_value_float() == rhsresult.get_value_float()); break ;
+                        case not_equals_op     : value = (lhsresult.get_value_float() != rhsresult.get_value_float()); break ;
+                        default : value = false ;
+                }
 	}
 
 	result->set_value(value?1:0) ;
@@ -132,10 +146,46 @@ Data_Type Plus_Ast::get_data_type() {
 }
 
 void Plus_Ast::print_ast(ostream & file_buffer) {
+  file_buffer << endl << AST_NODE_SPACE << "Arith: PLUS" << endl;
+
+  file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+  lhs->print_ast(file_buffer);
+  file_buffer << ")\n";
   
+  file_buffer << AST_SUB_NODE_SPACE << "RHS (";
+  rhs->print_ast(file_buffer);
+  file_buffer << ")";
 }
 
 Eval_Result & Plus_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+  Eval_Result & lhs_result = lhs->evaluate(eval_env, file_buffer);
+  Eval_Result & rhs_result = rhs->evaluate(eval_env, file_buffer);
+  
+  if(node_data_type == int_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Int(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value( lhs_result.get_value() + rhs_result.get_value());
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value( (int) (lhs_result.get_value_float() + rhs_result.get_value_float()));
+    }
+    return * result;
+  }
+  
+  else if(node_data_type == float_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Float(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value_float( (float) (lhs_result.get_value() + rhs_result.get_value()));
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value_float( lhs_result.get_value_float() + rhs_result.get_value_float());
+    }
+    return * result;
+  }
+
+  else {
+    report_error("Data-Type not defined for addition\n", NOLINE);
+  }
 }
   
 /**********************************************************************************/
@@ -152,10 +202,46 @@ Data_Type Minus_Ast::get_data_type() {
 }
 
 void Minus_Ast::print_ast(ostream & file_buffer) {
+  file_buffer << endl << AST_NODE_SPACE << "Arith: MINUS" << endl;
+
+  file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+  lhs->print_ast(file_buffer);
+  file_buffer << ")\n";
   
+  file_buffer << AST_SUB_NODE_SPACE << "RHS (";
+  rhs->print_ast(file_buffer);
+  file_buffer << ")";
 }
 
 Eval_Result & Minus_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+  Eval_Result & lhs_result = lhs->evaluate(eval_env, file_buffer);
+  Eval_Result & rhs_result = rhs->evaluate(eval_env, file_buffer);
+  
+  if(node_data_type == int_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Int(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value( lhs_result.get_value() - rhs_result.get_value());
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value( (int) (lhs_result.get_value_float() - rhs_result.get_value_float()));
+    }
+    return * result;
+  }
+  
+  else if(node_data_type == float_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Float(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value_float( (float) (lhs_result.get_value() - rhs_result.get_value()));
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value_float( lhs_result.get_value_float() - rhs_result.get_value_float());
+    }
+    return * result;
+  }
+
+  else {
+    report_error("Data-Type not defined for addition\n", NOLINE);
+  }
 }
 /**********************************************************************************/
 
@@ -171,10 +257,46 @@ Data_Type Multiplication_Ast::get_data_type() {
 }
 
 void Multiplication_Ast::print_ast(ostream & file_buffer) {
+  file_buffer << endl << AST_NODE_SPACE << "Arith: MULT" << endl;
+
+  file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+  lhs->print_ast(file_buffer);
+  file_buffer << ")\n";
   
+  file_buffer << AST_SUB_NODE_SPACE << "RHS (";
+  rhs->print_ast(file_buffer);
+  file_buffer << ")";
 }
 
-Eval_Result & Multiplication_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+Eval_Result & Multiplication_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {  
+  Eval_Result & lhs_result = lhs->evaluate(eval_env, file_buffer);
+  Eval_Result & rhs_result = rhs->evaluate(eval_env, file_buffer);
+  
+  if(node_data_type == int_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Int(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value( lhs_result.get_value() * rhs_result.get_value());
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value( (int) (lhs_result.get_value_float() * rhs_result.get_value_float()));
+    }
+    return * result;
+  }
+  
+  else if(node_data_type == float_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Float(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value_float( (float) (lhs_result.get_value() * rhs_result.get_value()));
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value_float( lhs_result.get_value_float() * rhs_result.get_value_float());
+    }
+    return * result;
+  }
+
+  else {
+    report_error("Data-Type not defined for addition\n", NOLINE);
+  }
 }
 /**********************************************************************************/
 
@@ -190,10 +312,46 @@ Data_Type Division_Ast::get_data_type() {
 }
 
 void Division_Ast::print_ast(ostream & file_buffer) {
+  file_buffer << endl << AST_NODE_SPACE << "Arith: DIV" << endl;
+
+  file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+  lhs->print_ast(file_buffer);
+  file_buffer << ")\n";
   
+  file_buffer << AST_SUB_NODE_SPACE << "RHS (";
+  rhs->print_ast(file_buffer);
+  file_buffer << ")";
 }
 
 Eval_Result & Division_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+  Eval_Result & lhs_result = lhs->evaluate(eval_env, file_buffer);
+  Eval_Result & rhs_result = rhs->evaluate(eval_env, file_buffer);
+  
+  if(node_data_type == int_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Int(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value( lhs_result.get_value() / rhs_result.get_value());
+    }
+    else if(lhs_result.get_result_enum() == float_result) {
+      result->set_value( (int) (lhs_result.get_value_float() / rhs_result.get_value_float()));
+    }
+    return * result;
+  }
+  
+  else if(node_data_type == float_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Float(); 
+    if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      result->set_value_float( (float) (lhs_result.get_value() / rhs_result.get_value()));
+    }
+    else if(lhs_result.get_result_enum() == float_result) { 
+      result->set_value_float( lhs_result.get_value_float() / rhs_result.get_value_float());
+    }
+    return * result;
+  }
+
+  else {
+    report_error("Data-Type not defined for addition\n", NOLINE);
+  }
 }
 /**********************************************************************************/
 
@@ -217,10 +375,40 @@ Data_Type Unary_Ast::get_data_type() {
 }
 
 void Unary_Ast::print_ast(ostream & file_buffer) {
-  
+  file_buffer << endl << AST_NODE_SPACE << "Arith: UMINUS" << endl;
+  file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+  rhs->print_ast(file_buffer);
+  file_buffer << ")";
 }
 
 Eval_Result & Unary_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+  Eval_Result & rhs_result = rhs->evaluate(eval_env, file_buffer);
+  
+  if(node_data_type == int_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Int(); 
+    if(rhs_result.get_result_enum() == int_result || rhs_result.get_result_enum() == bool_result) {
+      result->set_value( -1 * rhs_result.get_value());
+    }
+    else if(rhs_result.get_result_enum() == float_result) {
+      result->set_value(-1 * (int) rhs_result.get_value_float());
+    }
+    return * result;
+  }
+  
+  else if(node_data_type == float_data_type) {
+    Eval_Result * result = new Eval_Result_Value_Float(); 
+    if(rhs_result.get_result_enum() == int_result || rhs_result.get_result_enum() == bool_result) {
+      result->set_value_float(-1 * (float) rhs_result.get_value());
+    }
+    else if(rhs_result.get_result_enum() == float_result) {
+      result->set_value_float( -1 * rhs_result.get_value_float());
+    }
+    return * result;
+  }
+
+  else {
+    report_error("Data-Type not defined for addition\n", NOLINE);
+  }  
 }
 /***********************************************************************************/
 

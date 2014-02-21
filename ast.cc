@@ -21,6 +21,7 @@
 ***********************************************************************************************/
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 
 using namespace std;
@@ -42,6 +43,10 @@ bool Ast::check_ast(int line) {
 
 Data_Type Ast::get_data_type() {
 	report_internal_error("Should not reach, Ast : get_data_type");
+}
+
+void Ast::set_data_type(Data_Type cast) {
+  node_data_type = cast;
 }
 
 void Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) {
@@ -83,8 +88,7 @@ bool Assignment_Ast::check_ast(int line) {
 }
 
 void Assignment_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << "\n" ;
-	file_buffer << AST_SPACE << "Asgn:\n";
+  	file_buffer << AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
 	lhs->print_ast(file_buffer);
@@ -116,16 +120,18 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry) {
 	variable_name = name;
 	variable_symbol_entry = var_entry;
+	node_data_type = variable_symbol_entry.get_data_type();
 }
 
 Name_Ast::~Name_Ast() {}
 
 Data_Type Name_Ast::get_data_type() {
-	return variable_symbol_entry.get_data_type();
+  return node_data_type;
 }
 
+
 void Name_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << "Name : " << variable_name;
+  file_buffer << "Name : "  << variable_name;
 }
 
 void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) {
@@ -139,9 +145,11 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) 
 
 	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
 	{
-		if (loc_var_val->get_result_enum() == int_result)
+	  if (loc_var_val->get_result_enum() == int_result) 
 			file_buffer << loc_var_val->get_value() << "\n";
-		else
+	  else if(loc_var_val->get_result_enum() == float_result)
+	    file_buffer << std::fixed << std::setprecision(2) << loc_var_val->get_value_float() << "\n";
+	  else
 			report_internal_error("Result type can only be int and float");
 	}
 
@@ -153,6 +161,12 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) 
 				file_buffer << "0\n";
 			else
 				file_buffer << glob_var_val->get_value() << "\n";
+		}
+		else if(glob_var_val->get_result_enum() == float_result) {
+			if (glob_var_val == NULL)
+				file_buffer << "0\n";
+			else
+				file_buffer << std::fixed << std::setprecision(2) << glob_var_val->get_value_float() << "\n";
 		}
 		else
 			report_internal_error("Result type can only be int and float");
@@ -176,8 +190,11 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 	if (result.get_result_enum() == int_result || result.get_result_enum() == bool_result) {
 		i = new Eval_Result_Value_Int();
 	 	i->set_value(result.get_value());
-	} 
-
+	}
+	else if(result.get_result_enum() == float_result) {
+		i = new Eval_Result_Value_Float();
+	 	i->set_value_float(result.get_value_float());
+	}
 	if (eval_env.does_variable_exist(variable_name))
 		eval_env.put_variable_value(*i, variable_name);
 	else
@@ -185,7 +202,23 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 }
 
 Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	return get_value_of_evaluation(eval_env);
+	Eval_Result & res = get_value_of_evaluation(eval_env);
+	if(node_data_type == int_data_type) {
+	  if(res.get_result_enum() == int_result) {
+	    return *new Eval_Result_Value_Int(res.get_value());
+	  }
+	  else if(res.get_result_enum() == float_result) {
+	    return *new Eval_Result_Value_Int(res.get_value_float());
+	  } 
+	}
+	else if(node_data_type == float_data_type) {
+	  if(res.get_result_enum() == int_result) {
+	    return *new Eval_Result_Value_Float(res.get_value());
+	  }
+	  else if(res.get_result_enum() == float_result) {
+	    return *new Eval_Result_Value_Float(res.get_value_float());
+	  }
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,7 +239,7 @@ Data_Type Number_Ast<DATA_TYPE>::get_data_type() {
 
 template <class DATA_TYPE>
 void Number_Ast<DATA_TYPE>::print_ast(ostream & file_buffer) {
-	file_buffer << "Num : " << constant;
+  file_buffer << "Num : " << std::fixed << std::setprecision(2) << constant;
 }
 
 template <class DATA_TYPE>
@@ -217,6 +250,15 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 		result.set_value(constant);
 
 		return result;
+	}
+	else if(node_data_type == float_data_type) {
+	        Eval_Result & result = *new Eval_Result_Value_Float();
+		result.set_value_float(constant);
+
+		return result;
+	}  
+	else {
+	  report_error("Constant type not compatible\n",NOLINE);
 	}
 }
 
@@ -232,7 +274,7 @@ void Return_Ast::print_ast(ostream & file_buffer) {
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	file_buffer << endl << AST_SPACE << "Return <NOTHING>" << endl;
-	Eval_Result & result = *new Eval_Result_Value_Int();
+	Eval_Result & result = *new Eval_Result_BB(-1);
 	return result;
 }
 

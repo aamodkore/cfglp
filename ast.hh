@@ -50,7 +50,7 @@ public:
 
 	virtual Data_Type get_data_type();
 	virtual bool check_ast(int line);
-
+  virtual void set_data_type(Data_Type);
 	virtual void print_ast(ostream & file_buffer) = 0;
 	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
 

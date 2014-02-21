@@ -204,7 +204,7 @@ declaration_statement:
 |
 	FLOAT NAME ';'
 	{
-		$$ = new Symbol_Table_Entry(*$2, int_data_type);
+		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 		delete $2;
 	}
 ;
@@ -312,12 +312,9 @@ assignment_statement_list:
 assignment_statement:
 	variable ASSIGN_OP expression ';' 
 	{
-		#if 0
 		$$ = new Assignment_Ast($1, $3);
-
 		int line = get_line_number();
 		$$->check_ast(line);
-		#endif
 	}
 ;
 
@@ -340,47 +337,99 @@ goto_statement :
 ;
 
 identifier :
-	variable   	{ $$ = $1; }
+	variable   	
+	{ $$ = $1; }
 |
-	constant	{ $$ = $1; }
+	constant	
+	{ $$ = $1; }
 ;
 
 primary_expression:
-	identifier	{ $$ = $1; }
+	identifier	
+	{
+		$$ = $1; 
+	}
 |	
 	'(' expression ')'
-				{ $$ = $2; }
+	{ 
+		$$ = $2; 
+	}
 ;
 
 unary_expression:
-	'-' unary_expression { $$ = $2; } 
+	'-' unary_expression 
+	{ 
+		$$ = new Unary_Ast($2);
+		int line = get_line_number();
+		$$->check_ast(line);
+	} 
 |
-	'(' FLOAT ')' unary_expression {$$ = $4; }
+	'(' FLOAT ')' unary_expression 
+	{
+		$$ = $4;
+		$$->set_data_type(float_data_type);
+	}
 |
-	'(' INTEGER ')' unary_expression { $$ = $4; }
+	'(' INTEGER ')' unary_expression 
+	{
+		$4->set_data_type(int_data_type);
+		$$ = $4;
+	}
 |
-	'(' DOUBLE ')' unary_expression {$$ = $4; }
+	'(' DOUBLE ')' unary_expression 
+	{
+		$$ = $4;
+		$$->set_data_type(float_data_type);
+	}
 |
-	primary_expression { $$ = $1; } 
+	primary_expression 
+	{
+		$$ = $1; 
+	} 
 ;
 
 multiplicative_expression:
 	multiplicative_expression '*' unary_expression
+	{
+		$$ = new Multiplication_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
+	}
 |
 	multiplicative_expression '/' unary_expression
+	{
+		$$ = new Division_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
+	}
 |
 	unary_expression
+	{
+		$$ = $1;
+	}
 ;
 
 additive_expression:
 	additive_expression '+'  multiplicative_expression
+	{
+		$$ = new Plus_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
+	}
 |
 	additive_expression '-'  multiplicative_expression
+	{
+		$$ = new Minus_Ast($1, $3);
+		int line = get_line_number();
+		$$->check_ast(line);
+	}
 |	
-	multiplicative_expression
+	multiplicative_expression { $$ = $1; }
 ;
 
-arithmetic_expression : additive_expression;
+arithmetic_expression : additive_expression 
+	{ $$ = $1; }
+;
 
 comparison_expression :
         comparison_expression comparison_operator arithmetic_expression
@@ -402,7 +451,7 @@ equality_expression :
 			{ $$ = $1 ;}
 ;
 
-expression: equality_expression
+expression: equality_expression { $$ = $1; }
 ;
 
 
