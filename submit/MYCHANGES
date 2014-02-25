@@ -1,0 +1,19 @@
+*******************************************************************************
+
+CS 306 - Assignment 3b
+
+	S S Kausik	110050003
+	Aamod Kore	110050004
+
+*******************************************************************************
+
+Changes done after assignment 3a :
+
+1. Added ASTs for Arithmetic Expressions(Plus, Minus, Multiplication, Division 
+	and Unary Minus).
+2. Added functionality for float (float_data_type and Eval_Result_Value_Float)
+3. Type semantics check is implemented(Expressions must be purely int or float)
+4. Typecasting is implemented by changing the node_data_type of the AST. 
+	Evaluate functions of ASTs produce results according to this data type.
+
+************************************************************************
