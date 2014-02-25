@@ -52,7 +52,7 @@ bool Relational_Expr_Ast::check_ast(int line) {
 		return true;
 	}
 
-	report_error("Arithmetic statement data type not compatible", line);
+	report_error("Relational statement data type not compatible", line);
 }
 
 

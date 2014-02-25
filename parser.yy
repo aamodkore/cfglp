@@ -435,6 +435,8 @@ comparison_expression :
         comparison_expression comparison_operator arithmetic_expression
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
+		int line = get_line_number(); 
+		$$->check_ast(line);
 	} 
 |
 	arithmetic_expression
@@ -445,6 +447,8 @@ equality_expression :
         equality_expression equality_operator comparison_expression
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
+		int line = get_line_number(); 
+		$$->check_ast(line);
 	} 
 |
 	comparison_expression
