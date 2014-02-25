@@ -43,7 +43,18 @@ Relational_Expr_Ast::~Relational_Expr_Ast() {
 	if (!rhs) delete rhs ;
 }
 
-Data_Type Relational_Expr_Ast::get_data_type() { return int_data_type ; }
+Data_Type Relational_Expr_Ast::get_data_type() { return node_data_type; }
+
+bool Relational_Expr_Ast::check_ast(int line) {
+	if (lhs->get_data_type() == rhs->get_data_type())
+	{
+		node_data_type = int_data_type;
+		return true;
+	}
+
+	report_error("Arithmetic statement data type not compatible", line);
+}
+
 
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
@@ -80,8 +91,13 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	if (!rhsresult.is_variable_defined())
 		report_error("Variable should be defined on RHS of comparison.", NOLINE);
 
-
-	Eval_Result_Value_Bool * result = new Eval_Result_Value_Bool() ;
+	Eval_Result* result;
+	if(node_data_type == float_data_type) {
+	  result = new Eval_Result_Value_Float();
+	}
+	else {
+	  result = new Eval_Result_Value_Bool();
+	}
 	
 	bool value ;
 	if(lhsresult.get_result_enum() == int_result || lhsresult.get_result_enum() == bool_result) {
@@ -106,8 +122,12 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
                         default : value = false ;
                 }
 	}
-
-	result->set_value(value?1:0) ;
+	if(node_data_type == float_data_type) {
+	  result->set_value_float(value?1.0:0.0) ;
+	}
+	else {
+	  result->set_value(value?1:0) ;
+	}
 
 	// delete & lhsresult ;
 	// delete & rhsresult ;
@@ -328,11 +348,17 @@ Eval_Result & Division_Ast::evaluate(Local_Environment & eval_env, ostream & fil
   Eval_Result & rhs_result = rhs->evaluate(eval_env, file_buffer);
   
   if(node_data_type == int_data_type) {
-    Eval_Result * result = new Eval_Result_Value_Int(); 
+    Eval_Result * result = new Eval_Result_Value_Int();
     if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      if(rhs_result.get_value() == 0) {
+	report_error("Divide by 0",NOLINE);
+      }
       result->set_value( lhs_result.get_value() / rhs_result.get_value());
     }
     else if(lhs_result.get_result_enum() == float_result) {
+      if(rhs_result.get_value_float() == 0) {
+	report_error("Divide by 0", NOLINE);
+      }
       result->set_value( (int) (lhs_result.get_value_float() / rhs_result.get_value_float()));
     }
     return * result;
@@ -341,9 +367,15 @@ Eval_Result & Division_Ast::evaluate(Local_Environment & eval_env, ostream & fil
   else if(node_data_type == float_data_type) {
     Eval_Result * result = new Eval_Result_Value_Float(); 
     if(lhs_result.get_result_enum() == int_result || lhs_result.get_result_enum() == bool_result) {
+      if(rhs_result.get_value() == 0) {
+	report_error("Divide by 0", NOLINE);
+      }
       result->set_value_float( (float) (lhs_result.get_value() / rhs_result.get_value()));
     }
     else if(lhs_result.get_result_enum() == float_result) { 
+      if(rhs_result.get_value_float() == 0) {
+	report_error("Divide by 0", NOLINE);
+      }
       result->set_value_float( lhs_result.get_value_float() / rhs_result.get_value_float());
     }
     return * result;
