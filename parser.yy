@@ -45,7 +45,7 @@
 %token <integer_value> BB
 %token <float_value> FLOAT_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO
+%token RETURN INTEGER FLOAT DOUBLE VOID IF ELSE GOTO
 %token ASSIGN_OP NE EQ LT LE GT GE
 
 %type <symbol_table> declaration_statement_list
@@ -54,6 +54,7 @@
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
 %type <ast_list> assignment_statement_list
+%type <ast_list> expression_list
 %type <ast> assignment_statement
 %type <ast> if_else_statement
 %type <ast> goto_statement
@@ -78,34 +79,65 @@
 %%
 
 program:
-	declaration_statement_list procedure_name
-	{
-		program_object.set_global_table(*$1);
-		return_statement_used_flag = false;				// No return statement in the current procedure till now
-	}
-	procedure_body
-	{
-		program_object.set_procedure_map(*current_procedure);
-
-		if ($1)
-			$1->global_list_in_proc_map_check(get_line_number());
-
-		delete $1;
-	}
+	procedure_list
 |
-	procedure_name
-	{
-		return_statement_used_flag = false;				// No return statement in the current procedure till now
-
-	}
-	procedure_body
-	{
-		program_object.set_procedure_map(*current_procedure);
-	}
+	declaration_statement_list procedure_list
 ;
+
+procedure_list :
+	procedure_declaration_list procedure_definition_list
+|
+	procedure_definition_list
+;
+
+procedure_declaration :
+	VOID procedure_name ';'
+|
+	INTEGER procedure_name ';'
+|
+	FLOAT procedure_name ';'
+;
+
+
+procedure_declaration_list:
+	procedure_declaration_list procedure_declaration
+|
+	procedure_declaration
+;
+
+
+procedure_definition :
+	procedure_name procedure_body
+;
+
+procedure_definition_list:
+	procedure_definition_list procedure_definition
+|
+	procedure_definition
+;
+
+
+arguement_list:
+	arguement_list ',' arguement
+|
+	arguement
+;
+
+
+arguement:
+	INTEGER NAME
+|
+	FLOAT NAME
+;
+
 
 procedure_name:
 	NAME '(' ')'
+	{
+		current_procedure = new Procedure(void_data_type, *$1);
+	}
+|
+	NAME '(' arguement_list ')'
 	{
 		current_procedure = new Procedure(void_data_type, *$1);
 	}
@@ -251,7 +283,7 @@ executable_statement_list:
 		$$ = $1;
 	}
 |
-	assignment_statement_list RETURN ';'
+	assignment_statement_list return_statement
 	{
 		Ast * ret = new Return_Ast();
 
@@ -307,6 +339,15 @@ assignment_statement_list:
 
 		$$->push_back($2);
 	}
+|
+	assignment_statement_list function_call ';'
+	{
+		if ($1 == NULL)
+			$$ = new list<Ast *>;
+
+		else
+			$$ = $1;
+	}
 ;
 
 assignment_statement:
@@ -314,7 +355,7 @@ assignment_statement:
 	{
 		$$ = new Assignment_Ast($1, $3);
 		int line = get_line_number();
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	}
 ;
 
@@ -335,6 +376,12 @@ goto_statement :
 	}
 		
 ;
+
+return_statement :
+	RETURN ';'
+|
+	RETURN expression ';'
+;	
 
 identifier :
 	variable   	
@@ -361,7 +408,7 @@ unary_expression:
 	{ 
 		$$ = new Unary_Ast($2);
 		int line = get_line_number();
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	} 
 |
 	'(' FLOAT ')' unary_expression 
@@ -386,6 +433,19 @@ unary_expression:
 	{
 		$$ = $1; 
 	} 
+|
+	function_call 
+	{
+		Ast * ret = new Return_Ast();
+		$$ = ret ;
+	}
+;
+
+
+function_call:
+	NAME '(' expression_list ')'
+|
+	NAME '(' ')'
 ;
 
 multiplicative_expression:
@@ -393,14 +453,14 @@ multiplicative_expression:
 	{
 		$$ = new Multiplication_Ast($1, $3);
 		int line = get_line_number();
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	}
 |
 	multiplicative_expression '/' unary_expression
 	{
 		$$ = new Division_Ast($1, $3);
 		int line = get_line_number();
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	}
 |
 	unary_expression
@@ -414,14 +474,14 @@ additive_expression:
 	{
 		$$ = new Plus_Ast($1, $3);
 		int line = get_line_number();
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	}
 |
 	additive_expression '-'  multiplicative_expression
 	{
 		$$ = new Minus_Ast($1, $3);
 		int line = get_line_number();
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	}
 |	
 	multiplicative_expression { $$ = $1; }
@@ -436,7 +496,7 @@ comparison_expression :
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 		int line = get_line_number(); 
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	} 
 |
 	arithmetic_expression
@@ -448,7 +508,7 @@ equality_expression :
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 		int line = get_line_number(); 
-		$$->check_ast(line);
+		// $$->check_ast(line);
 	} 
 |
 	comparison_expression
@@ -458,6 +518,19 @@ equality_expression :
 expression: equality_expression { $$ = $1; }
 ;
 
+expression_list :
+	expression_list ',' expression
+	{
+		$$ = $1 ;
+		$$->push_back($3);
+	}
+|
+	expression
+	{
+		$$ = new list<Ast *>;
+		$$->push_back($1);
+	}
+;
 
 comparison_operator :
     GE    { $$ = greater_equals_op; } 
@@ -488,8 +561,8 @@ variable:
 
 		else
 		{
-			int line = get_line_number();
-			report_error("Variable has not been declared", line);
+			// int line = get_line_number();
+			// report_error("Variable has not been declared", line);
 		}
 
 		$$ = new Name_Ast(*$1, var_table_entry);

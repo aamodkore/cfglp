@@ -26,6 +26,11 @@
 
 %%
 
+void		{
+			store_token_name("VOID");
+			return Parser::VOID; 
+		}
+
 int		{
 			store_token_name("INTEGER");
 			return Parser::INTEGER; 
@@ -101,7 +106,7 @@ goto		{
 				return matched()[0];
 			}
 
-[:{}();]	{
+[:{}();,]	{
 			store_token_name("META CHAR");
 			return matched()[0];
 		}
