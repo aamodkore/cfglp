@@ -49,7 +49,9 @@
 %token ASSIGN_OP NE EQ LT LE GT GE
 
 %type <symbol_table> declaration_statement_list
+%type <symbol_table> arguement_list
 %type <symbol_entry> declaration_statement
+%type <symbol_entry> arguement
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
@@ -119,15 +121,54 @@ procedure_definition_list:
 
 arguement_list:
 	arguement_list ',' arguement
+	{
+		// if declaration is local then no need to check in global list
+		// if declaration is global then this list is global list
+
+		int line = get_line_number();
+		string var_name = $3->get_variable_name();
+		program_object.variable_in_proc_map_check($3->get_variable_name(), line);
+
+		if ($1 != NULL)
+		{
+			if($1->variable_in_symbol_list_check(var_name))
+			{
+				int line = get_line_number();
+				report_error("Variable is declared twice", line);
+			}
+
+			$$ = $1;
+		}
+
+		else
+			$$ = new Symbol_Table();
+
+		$$->push_symbol($3);
+	}
 |
 	arguement
+	{
+		int line = get_line_number();
+		program_object.variable_in_proc_map_check($1->get_variable_name(), line);
+
+		$$ = new Symbol_Table();
+		$$->push_symbol($1);	
+	}
 ;
 
 
 arguement:
 	INTEGER NAME
+	{
+		$$ = new Symbol_Table_Entry(*$2, int_data_type);
+		delete $2;
+	}
 |
 	FLOAT NAME
+	{
+		$$ = new Symbol_Table_Entry(*$2, int_data_type);
+		delete $2;
+	}
 ;
 
 
@@ -140,6 +181,7 @@ procedure_name:
 	NAME '(' arguement_list ')'
 	{
 		current_procedure = new Procedure(void_data_type, *$1);
+		current_procedure->set_argument_list(*$3);
 	}
 ;
 

@@ -65,6 +65,12 @@ void Procedure::set_local_list(Symbol_Table & new_list)
 	local_symbol_table.set_table_scope(local);
 }
 
+void Procedure::set_argument_list(Symbol_Table & arg_list)
+{
+	argument_symbol_table = arg_list;
+	argument_symbol_table.set_table_scope(local);
+}
+
 Data_Type Procedure::get_return_type()
 {
 	return return_type;
