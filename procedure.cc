@@ -237,6 +237,11 @@ Eval_Result & Procedure::evaluate(list<Eval_Result *> & argument_value_list, ost
 		  if(result->get_return_result() != NULL) {
 			  result = result->get_return_result();
 		  }
+		  else {
+			  // Dummy Result.
+			  result = new Eval_Result_Value_Int();
+			  result->set_result_enum(void_result);
+		  }
 		  break;
 	  }
 	  if( result->get_result_enum() == bb_result ) {
@@ -251,7 +256,7 @@ Eval_Result & Procedure::evaluate(list<Eval_Result *> & argument_value_list, ost
 	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << " << name << " >>\n";
 	
 	if(return_type == int_data_type || return_type == float_data_type) {
-		if(result->get_result_enum() != return_result) {
+		if(result->get_result_enum() != return_result && result->get_result_enum() != void_result ) {
 			return_symbol_table->create(eval_env);
 			eval_env.put_variable_value( *((Eval_Result_Value *)result), *return_name);
 		}
