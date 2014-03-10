@@ -37,7 +37,8 @@ typedef enum
 	float_result,
 	void_result,
 	bool_result,
-	bb_result
+	bb_result,
+	return_result
 } Result_Enum;
 
 class Eval_Result;
@@ -50,9 +51,10 @@ protected:
 
 public:
 	virtual int get_value();
-  virtual float get_value_float();    
+	virtual float get_value_float();    
 	virtual void set_value(int value);
         virtual void set_value_float(float value);
+	virtual Eval_Result * get_return_result();
 
 	virtual bool is_variable_defined();
 	virtual void set_variable_status(bool def);
@@ -134,6 +136,21 @@ public:
 	Result_Enum get_result_enum();
 };
 
+class Eval_Result_Value_Return:public Eval_Result
+{
+	Eval_Result * return_value;
+	bool defined;
+
+public:
+	Eval_Result_Value_Return();
+	Eval_Result_Value_Return(Eval_Result * retval);
+	~Eval_Result_Value_Return();
+
+	Eval_Result * get_return_result();
+       	
+	void set_result_enum(Result_Enum res);
+	Result_Enum get_result_enum();
+};
 
 
 

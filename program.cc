@@ -63,6 +63,16 @@ void Program::set_procedure_map(Procedure & proc)
 	procedure_map[proc.get_proc_name()] = &proc;
 }
 
+Procedure * Program::get_procedure(string name) {
+	if( procedure_map.count(name) == 0 && name != "main") {
+		report_error("Function "+name+" not declared", NOLINE);
+	}
+	if(name == "main") {
+		set_procedure_map(*(new Procedure(void_data_type, name)));
+	}
+	return procedure_map[name];
+}
+
 bool Program::variable_in_symbol_list_check(string variable)
 {
 	return global_symbol_table.variable_in_symbol_list_check(variable);
@@ -75,7 +85,7 @@ Symbol_Table_Entry & Program::get_symbol_table_entry(string variable_name)
 
 void Program::variable_in_proc_map_check(string variable, int line)
 {
-	if(procedure_map[variable] != NULL)
+	if(procedure_map.count(variable) != 0)
 		report_error("Variable name cannot be same as procedure name", line);
 }
 
@@ -104,7 +114,12 @@ void Program::print_ast()
 
 	else
 	{
-		main->print_ast(ast_buffer);
+		for(map<string, Procedure *>::iterator proc_itr = procedure_map.begin();
+		    proc_itr != procedure_map.end();
+		    ++proc_itr) {
+			(proc_itr->second)->print_ast(ast_buffer);
+			ast_buffer << endl;
+		}
 	}
 }
 
@@ -122,6 +137,7 @@ Eval_Result & Program::evaluate()
 	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):\n";
 	interpreter_global_table.print(file_buffer);
 
+	// Main procedure has no arguments. 
 	Eval_Result & result = main->evaluate(file_buffer);
 
 	file_buffer << GLOB_SPACE << "Global Variables (after evaluating):\n";

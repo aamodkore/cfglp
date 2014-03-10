@@ -76,6 +76,8 @@ class Parser: public ParserBase
 	bool return_statement_used_flag;				// Keeps track that atleast a procedure has atleast 1 return statement
 	void bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number); 
         
+	
+	Data_Type current_return_type;          // Stores the function return type of the current function declaration/ Current variable type.
 	void executeAction(int ruleNr);
         void errorRecovery();
         int lookup(bool recovery);

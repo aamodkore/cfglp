@@ -88,7 +88,7 @@ bool Assignment_Ast::check_ast(int line) {
 }
 
 void Assignment_Ast::print_ast(ostream & file_buffer) {
-  	file_buffer << AST_SPACE << "Asgn:\n";
+  	file_buffer << endl <<  AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
 	lhs->print_ast(file_buffer);
@@ -100,8 +100,8 @@ void Assignment_Ast::print_ast(ostream & file_buffer) {
 }
 
 Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	Eval_Result & result = rhs->evaluate(eval_env, file_buffer);
-
+        Eval_Result & result = rhs->evaluate(eval_env, file_buffer);
+	
 	if (result.is_variable_defined() == false)
 		report_error("Variable should be defined to be on rhs", NOLINE);
 
@@ -145,7 +145,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) 
 
 	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
 	{
-	  if (loc_var_val->get_result_enum() == int_result) 
+	  if (loc_var_val->get_result_enum() == int_result || loc_var_val->get_result_enum() == bool_result) 
 			file_buffer << loc_var_val->get_value() << "\n";
 	  else if(loc_var_val->get_result_enum() == float_result)
 	    file_buffer << std::fixed << std::setprecision(2) << loc_var_val->get_value_float() << "\n";
@@ -155,7 +155,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) 
 
 	else
 	{
-		if (glob_var_val->get_result_enum() == int_result)
+		if (glob_var_val->get_result_enum() == int_result || glob_var_val->get_result_enum() == bool_result)
 		{
 			if (glob_var_val == NULL)
 				file_buffer << "0\n";
@@ -204,7 +204,7 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	Eval_Result & res = get_value_of_evaluation(eval_env);
 	if(node_data_type == int_data_type) {
-	  if(res.get_result_enum() == int_result) {
+	  if(res.get_result_enum() == int_result || res.get_result_enum() == bool_result) {
 	    return *new Eval_Result_Value_Int(res.get_value());
 	  }
 	  else if(res.get_result_enum() == float_result) {
@@ -212,7 +212,7 @@ Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 	  } 
 	}
 	else if(node_data_type == float_data_type) {
-	  if(res.get_result_enum() == int_result) {
+	  if(res.get_result_enum() == int_result || res.get_result_enum() == bool_result) {
 	    return *new Eval_Result_Value_Float(res.get_value());
 	  }
 	  else if(res.get_result_enum() == float_result) {
@@ -264,18 +264,40 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Return_Ast::Return_Ast() {}
+Return_Ast::Return_Ast() {
+	return_exp = NULL;
+}
+
+Return_Ast::Return_Ast(Ast * ret) {
+	return_exp = ret;
+}
+
 
 Return_Ast::~Return_Ast() {}
 
 void Return_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << AST_SPACE << "Return <NOTHING>\n";
+	file_buffer << endl << AST_SPACE << "RETURN ";
+	if(return_exp != NULL) {
+		return_exp->print_ast(file_buffer);
+		file_buffer << endl;
+	}
+	else {
+		file_buffer << "<NOTHING>" << endl;
+	}
 }
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	file_buffer << endl << AST_SPACE << "Return <NOTHING>" << endl;
-	Eval_Result & result = *new Eval_Result_BB(-1);
-	return result;
+	file_buffer << endl;
+	print_ast(file_buffer);
+	if(return_exp != NULL) {
+		//cout << "Ret value must be here\n";
+		//cout << return_exp->get_data_type() << " is the data type\n";
+		//cout << return_exp->evaluate(eval_env, file_buffer).get_value() << " is the val\n";
+		return *new Eval_Result_Value_Return(&return_exp->evaluate(eval_env, file_buffer));
+	}
+	else {
+		return *new Eval_Result_Value_Return();
+	}
 }
 
 template class Number_Ast<int>;
@@ -336,9 +358,16 @@ void Conditional_Goto_Ast::print_ast(ostream & file_buffer) {
 }
 
 Eval_Result & Conditional_Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) { 
+	file_buffer << AST_SPACE << "If_Else statement:";
+	condition->print_ast(file_buffer);
+
 	Eval_Result & cond = condition->evaluate(eval_env, file_buffer);
-	file_buffer << endl ;
-	print_ast(file_buffer) ;
+	file_buffer << endl;
+	file_buffer << endl << AST_NODE_SPACE << "True Successor: " ;
+	file_buffer << if_goto << "\n";
+
+	file_buffer << AST_NODE_SPACE << "False Successor: " ;
+	file_buffer << else_goto << "\n";
 
 	int bb = 0 ;
 	

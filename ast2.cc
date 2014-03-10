@@ -30,108 +30,109 @@ using namespace std;
 #include "local-environment.hh"
 
 #include "symbol-table.hh"
+#include "procedure.hh"
 #include "ast.hh"
 
 Relational_Expr_Ast::Relational_Expr_Ast(Ast* temp_lhs, Relational_Operator opr, Ast* temp_rhs) {
-	relational_op = opr ;
-	lhs = temp_lhs ;
-	rhs = temp_rhs ;
+  relational_op = opr ;
+  lhs = temp_lhs ;
+  rhs = temp_rhs ;
 }
 
 Relational_Expr_Ast::~Relational_Expr_Ast() {
-	if (!lhs) delete lhs ;
-	if (!rhs) delete rhs ;
+  if (!lhs) delete lhs ;
+  if (!rhs) delete rhs ;
 }
 
 Data_Type Relational_Expr_Ast::get_data_type() { return node_data_type; }
 
 bool Relational_Expr_Ast::check_ast(int line) {
-	if (lhs->get_data_type() == rhs->get_data_type())
-	{
-		node_data_type = int_data_type;
-		return true;
-	}
+  if (lhs->get_data_type() == rhs->get_data_type())
+    {
+      node_data_type = int_data_type;
+      return true;
+    }
 
-	report_error("Relational statement data type not compatible", line);
+  report_error("Relational statement data type not compatible", line);
 }
 
 
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
 
-	file_buffer << endl << AST_NODE_SPACE << "Condition: ";
+  file_buffer << endl << AST_NODE_SPACE << "Condition: ";
 
-	switch(relational_op) {
-		case greater_than_op   : file_buffer << "GT" ; break ;
-		case greater_equals_op : file_buffer << "GE" ; break ;
-		case less_than_op      : file_buffer << "LT" ; break ;
-		case less_equals_op    : file_buffer << "LE" ; break ;
-		case equals_op         : file_buffer << "EQ" ; break ;
-		case not_equals_op     : file_buffer << "NE" ; break ;
-		default : file_buffer << "nop" ; break ;
-	}
-	file_buffer << endl ;
+  switch(relational_op) {
+  case greater_than_op   : file_buffer << "GT" ; break ;
+  case greater_equals_op : file_buffer << "GE" ; break ;
+  case less_than_op      : file_buffer << "LT" ; break ;
+  case less_equals_op    : file_buffer << "LE" ; break ;
+  case equals_op         : file_buffer << "EQ" ; break ;
+  case not_equals_op     : file_buffer << "NE" ; break ;
+  default : file_buffer << "nop" ; break ;
+  }
+  file_buffer << endl ;
 
-	file_buffer << AST_SUB_NODE_SPACE << "LHS (";
-	lhs->print_ast(file_buffer);
-	file_buffer << ")\n";
+  file_buffer << AST_SUB_NODE_SPACE << "LHS (";
+  lhs->print_ast(file_buffer);
+  file_buffer << ")\n";
 
-	file_buffer << AST_SUB_NODE_SPACE << "RHS (";
-	rhs->print_ast(file_buffer);
-	file_buffer << ")";
+  file_buffer << AST_SUB_NODE_SPACE << "RHS (";
+  rhs->print_ast(file_buffer);
+  file_buffer << ")";
 }
 
 
 Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	Eval_Result & lhsresult = lhs->evaluate(eval_env, file_buffer);
-	Eval_Result & rhsresult = rhs->evaluate(eval_env, file_buffer);
+  Eval_Result & lhsresult = lhs->evaluate(eval_env, file_buffer);
+  Eval_Result & rhsresult = rhs->evaluate(eval_env, file_buffer);
 
-	if (!lhsresult.is_variable_defined())
-		report_error("Variable should be defined on LHS of comparison.", NOLINE);
-	if (!rhsresult.is_variable_defined())
-		report_error("Variable should be defined on RHS of comparison.", NOLINE);
+  if (!lhsresult.is_variable_defined())
+    report_error("Variable should be defined on LHS of comparison.", NOLINE);
+  if (!rhsresult.is_variable_defined())
+    report_error("Variable should be defined on RHS of comparison.", NOLINE);
 
-	Eval_Result* result;
-	if(node_data_type == float_data_type) {
-	  result = new Eval_Result_Value_Float();
-	}
-	else {
-	  result = new Eval_Result_Value_Bool();
-	}
+  Eval_Result* result;
+  if(node_data_type == float_data_type) {
+    result = new Eval_Result_Value_Float();
+  }
+  else {
+    result = new Eval_Result_Value_Bool();
+  }
 	
-	bool value ;
-	if(lhsresult.get_result_enum() == int_result || lhsresult.get_result_enum() == bool_result) {
-		switch(relational_op) {
-			case greater_than_op   : value = (lhsresult.get_value() >  rhsresult.get_value()); break ;
-			case greater_equals_op : value = (lhsresult.get_value() >= rhsresult.get_value()); break ;
-			case less_than_op      : value = (lhsresult.get_value() <  rhsresult.get_value()); break ;
-			case less_equals_op    : value = (lhsresult.get_value() <= rhsresult.get_value()); break ;
-			case equals_op         : value = (lhsresult.get_value() == rhsresult.get_value()); break ;
-			case not_equals_op     : value = (lhsresult.get_value() != rhsresult.get_value()); break ;
-			default : value = false ;
-		}
-	}
-	else if(lhsresult.get_result_enum() == float_result) {
-		switch(relational_op) {
-                        case greater_than_op   : value = (lhsresult.get_value_float() >  rhsresult.get_value_float()); break ;
-                        case greater_equals_op : value = (lhsresult.get_value_float() >= rhsresult.get_value_float()); break ;
-                        case less_than_op      : value = (lhsresult.get_value_float() <  rhsresult.get_value_float()); break ;
-                        case less_equals_op    : value = (lhsresult.get_value_float() <= rhsresult.get_value_float()); break ; 
-                        case equals_op         : value = (lhsresult.get_value_float() == rhsresult.get_value_float()); break ;
-                        case not_equals_op     : value = (lhsresult.get_value_float() != rhsresult.get_value_float()); break ;
-                        default : value = false ;
-                }
-	}
-	if(node_data_type == float_data_type) {
-	  result->set_value_float(value?1.0:0.0) ;
-	}
-	else {
-	  result->set_value(value?1:0) ;
-	}
+  bool value ;
+  if(lhsresult.get_result_enum() == int_result || lhsresult.get_result_enum() == bool_result) {
+    switch(relational_op) {
+    case greater_than_op   : value = (lhsresult.get_value() >  rhsresult.get_value()); break ;
+    case greater_equals_op : value = (lhsresult.get_value() >= rhsresult.get_value()); break ;
+    case less_than_op      : value = (lhsresult.get_value() <  rhsresult.get_value()); break ;
+    case less_equals_op    : value = (lhsresult.get_value() <= rhsresult.get_value()); break ;
+    case equals_op         : value = (lhsresult.get_value() == rhsresult.get_value()); break ;
+    case not_equals_op     : value = (lhsresult.get_value() != rhsresult.get_value()); break ;
+    default : value = false ;
+    }
+  }
+  else if(lhsresult.get_result_enum() == float_result) {
+    switch(relational_op) {
+    case greater_than_op   : value = (lhsresult.get_value_float() >  rhsresult.get_value_float()); break ;
+    case greater_equals_op : value = (lhsresult.get_value_float() >= rhsresult.get_value_float()); break ;
+    case less_than_op      : value = (lhsresult.get_value_float() <  rhsresult.get_value_float()); break ;
+    case less_equals_op    : value = (lhsresult.get_value_float() <= rhsresult.get_value_float()); break ; 
+    case equals_op         : value = (lhsresult.get_value_float() == rhsresult.get_value_float()); break ;
+    case not_equals_op     : value = (lhsresult.get_value_float() != rhsresult.get_value_float()); break ;
+    default : value = false ;
+    }
+  }
+  if(node_data_type == float_data_type) {
+    result->set_value_float(value?1.0:0.0) ;
+  }
+  else {
+    result->set_value(value?1:0) ;
+  }
 
-	// delete & lhsresult ;
-	// delete & rhsresult ;
-	return *result;
+  // delete & lhsresult ;
+  // delete & rhsresult ;
+  return *result;
 }
 /********************************************************************************/
 Arithmetic_Expr_Ast::Arithmetic_Expr_Ast() {}
@@ -139,13 +140,13 @@ Arithmetic_Expr_Ast::Arithmetic_Expr_Ast() {}
 Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {}
 
 bool Arithmetic_Expr_Ast::check_ast(int line) {
-	if (lhs->get_data_type() == rhs->get_data_type())
-	{
-		node_data_type = lhs->get_data_type();
-		return true;
-	}
-
-	report_error("Arithmetic statement data type not compatible", line);
+  if (lhs->get_data_type() == rhs->get_data_type())
+    {
+      node_data_type = lhs->get_data_type();
+      return true;
+    }
+  cout << lhs->get_data_type() << " " << rhs->get_data_type() << endl;
+  report_error("Arithmetic statement data type not compatible", line);
 }
 
 Data_Type Arithmetic_Expr_Ast::get_data_type() {
@@ -444,4 +445,95 @@ Eval_Result & Unary_Ast::evaluate(Local_Environment & eval_env, ostream & file_b
 }
 /***********************************************************************************/
 
+Call_Ast::Call_Ast() {
+}
 
+Call_Ast::Call_Ast(Procedure * f, list<Ast *> args) {
+  fn = f;
+  arguments = args;
+  node_data_type = void_data_type;
+}
+
+Call_Ast::Call_Ast(Procedure * f) {
+  fn = f;
+  arguments =  *(new list<Ast *>());  
+  node_data_type = void_data_type;
+}
+
+bool Call_Ast::check_ast(int line) {
+	node_data_type = fn->get_return_type();
+	if(arguments.size() == 0) {
+		/* Function call with no arguments */
+		return true;
+	}
+	bool check = fn->check_argument_types(arguments);
+	if(check == false) {
+		report_error("Arguments type is not same as declaration in " + fn->get_proc_name(), NOLINE);
+	}
+	return check;
+}
+
+Data_Type Call_Ast::get_data_type() {
+  return node_data_type;
+}
+
+Call_Ast::~Call_Ast() {}
+
+void Call_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << endl << AST_SPACE << "FN CALL: " << fn->get_proc_name() << "(" ;
+	list<Ast *>::iterator itr_arg;
+	for(itr_arg = arguments.begin(); itr_arg != arguments.end() ; itr_arg++) {
+		file_buffer << endl;
+		file_buffer << AST_SUB_NODE_SPACE;
+		(*itr_arg)->print_ast(file_buffer);
+	}
+	file_buffer << ")";
+}
+
+Eval_Result & Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
+	Eval_Result * res;
+	if(arguments.size() == 0) {
+		/* Function call with no arguments */
+		res = &fn->evaluate(file_buffer);
+	}
+	else {
+		list<Eval_Result*> argument_val_list;
+		
+		list<Ast *>::iterator itr_arg;
+		for(itr_arg = arguments.begin(); itr_arg != arguments.end() ; itr_arg++) {
+			Eval_Result & result = (*itr_arg)->evaluate(eval_env, file_buffer);
+			argument_val_list.push_back(&result);
+			
+		}
+		/* Function call with arguments */
+		res = &fn->evaluate(argument_val_list, file_buffer);	
+	}
+	
+	if(node_data_type == int_data_type) {
+		Eval_Result * result = new Eval_Result_Value_Int(); 
+		if(res->get_result_enum() == int_result || res->get_result_enum() == bool_result) {
+			result->set_value(res->get_value());
+		}
+		else if(res->get_result_enum() == float_result) {
+			result->set_value((int) res->get_value_float());
+		}
+		return * result;
+	}
+  
+	else if(node_data_type == float_data_type) {
+		Eval_Result * result = new Eval_Result_Value_Float(); 
+		if(res->get_result_enum() == int_result || res->get_result_enum() == bool_result) {
+			result->set_value_float((float) res->get_value());
+		}
+		else if(res->get_result_enum() == float_result) {
+			result->set_value_float(res->get_value_float());
+		}
+		return * result;
+	}
+	else if(node_data_type == void_data_type) {
+		return * res;
+	}
+	else {
+		report_error("Data-Type not defined for return type\n", NOLINE);
+	}  	
+}

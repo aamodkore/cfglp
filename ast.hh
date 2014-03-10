@@ -26,12 +26,15 @@
 
 #include <string>
 
+
+
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
 #define AST_SUB_NODE_SPACE "               "
 
 using namespace std;
 
+class Procedure;
 class Ast;
 
 enum Relational_Operator { 
@@ -50,7 +53,7 @@ public:
 
 	virtual Data_Type get_data_type();
 	virtual bool check_ast(int line);
-  virtual void set_data_type(Data_Type);
+	virtual void set_data_type(Data_Type);
 	virtual void print_ast(ostream & file_buffer) = 0;
 	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
 
@@ -113,9 +116,10 @@ public:
 
 class Return_Ast:public Ast
 {
-
+	Ast * return_exp;
 public:
 	Return_Ast();
+	Return_Ast(Ast * ret);
 	~Return_Ast();
 
 	void print_ast(ostream & file_buffer);
@@ -177,7 +181,7 @@ public:
 	~Relational_Expr_Ast() ;
 
 	Data_Type get_data_type();
-  bool check_ast(int line);
+	bool check_ast(int line);
 	void print_ast(ostream & file_buffer);
 	
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
@@ -187,8 +191,8 @@ public:
 class Arithmetic_Expr_Ast:public Ast
 {
 protected:
-  Ast * lhs;
-  Ast * rhs;
+	Ast * lhs;
+	Ast * rhs;
 public:
 	Arithmetic_Expr_Ast() ;
 	~Arithmetic_Expr_Ast() ;
@@ -203,22 +207,22 @@ public:
 
 class Plus_Ast:public Arithmetic_Expr_Ast
 {
-  public:
-  Plus_Ast(Ast * l, Ast * r) ;
+public:
+	Plus_Ast(Ast * l, Ast * r) ;
 	~Plus_Ast() ;
 
-	 Data_Type get_data_type();
+	Data_Type get_data_type();
  
-	 void print_ast(ostream & file_buffer);
+	void print_ast(ostream & file_buffer);
 	
-	 Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 class Minus_Ast:public Arithmetic_Expr_Ast
 {
 
 public:
-  Minus_Ast(Ast * l, Ast * r) ;
+	Minus_Ast(Ast * l, Ast * r) ;
 	~Minus_Ast() ;
 
 	Data_Type get_data_type();
@@ -231,7 +235,7 @@ public:
 class Multiplication_Ast:public Arithmetic_Expr_Ast
 {
 public:
-  Multiplication_Ast(Ast * l, Ast * r) ;
+	Multiplication_Ast(Ast * l, Ast * r) ;
 	~Multiplication_Ast() ;
 
 	Data_Type get_data_type();
@@ -244,14 +248,14 @@ class Division_Ast:public Arithmetic_Expr_Ast
 {
 
 public:
-  Division_Ast(Ast * l, Ast * r) ;
+	Division_Ast(Ast * l, Ast * r) ;
 	~Division_Ast() ;
 
-	 Data_Type get_data_type();
+	Data_Type get_data_type();
   
-	 void print_ast(ostream & file_buffer);
+	void print_ast(ostream & file_buffer);
 	
-	 Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
 class Unary_Ast:public Arithmetic_Expr_Ast
@@ -265,6 +269,23 @@ public:
 	void print_ast(ostream & file_buffer);
   
         bool check_ast(int line);
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Call_Ast:public Ast
+{
+	Procedure * fn;
+	list<Ast *> arguments;
+
+public:
+	Call_Ast();
+	Call_Ast(Procedure * f);
+	Call_Ast(Procedure * f, list<Ast *> args);
+	~Call_Ast();
+
+	void print_ast(ostream & file_buffer);
+	Data_Type get_data_type();
+	bool check_ast(int line);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 

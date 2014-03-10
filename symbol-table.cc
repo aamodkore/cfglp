@@ -92,6 +92,9 @@ Symbol_Table_Entry & Symbol_Table::get_symbol_table_entry(string variable_name)
 	report_error("variable symbol entry doesn't exist", NOLINE);
 }
 
+list<Symbol_Table_Entry *>::iterator Symbol_Table::get_symbol_table_iterator() {
+	return variable_table.begin();
+}
 void Symbol_Table::create(Local_Environment & local_global_variables_table)
 {
 	list<Symbol_Table_Entry *>::iterator i;
@@ -114,7 +117,7 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 		  if (scope == global)
 		    {
 		      j->set_variable_status(true);
-		      j->set_value(0.0);
+		      j->set_value_float(0.0);
 		    }
 		  
 		  local_global_variables_table.put_variable_value(*j, name);
@@ -122,6 +125,22 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 	}
 }
 
+bool Symbol_Table::check_ordered_data_types(list<Ast *> & arg_types) {
+	list<Symbol_Table_Entry *>::iterator itr_s;
+	list<Ast *>::iterator itr_d = arg_types.begin();
+	
+	if(variable_table.size() != arg_types.size()) {
+		return false;
+	}
+	for (itr_s = variable_table.begin(); itr_s != variable_table.end(); itr_s++, itr_d++)
+	{
+		if( (*itr_s)->get_data_type() != (*itr_d)->get_data_type() ) {
+			return false;
+		}
+	}
+	return true;
+}
+	
 /////////////////////////////////////////////////////////////
 
 Symbol_Table_Entry::Symbol_Table_Entry()

@@ -40,6 +40,11 @@ float Eval_Result::get_value_float()
 	report_internal_error("Should not reach, Eval_Result : get_value_float");
 }
 
+Eval_Result * Eval_Result::get_return_result()
+{
+	report_internal_error("Should not reach, Eval_Result : get_return_result");
+}
+
 void Eval_Result::set_value(int number)
 {
 	report_internal_error("Should not reach, Eval_Result : set_value");
@@ -224,6 +229,37 @@ Result_Enum Eval_Result_Value_Bool::get_result_enum()
 	return result_type;
 }
 ///////////////////////////////////////////////////////////////////////////////////
+Eval_Result_Value_Return::Eval_Result_Value_Return()
+{
+	return_value = NULL;
+	defined = false;
+	result_type = return_result;
+}
+
+Eval_Result_Value_Return::Eval_Result_Value_Return(Eval_Result *retval)
+{
+	return_value = retval;
+	defined = true;
+	result_type = return_result;
+}
+
+Eval_Result_Value_Return::~Eval_Result_Value_Return()
+{ }
+
+Eval_Result * Eval_Result_Value_Return::get_return_result() {
+	return return_value;
+}
+
+void Eval_Result_Value_Return::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+Result_Enum Eval_Result_Value_Return::get_result_enum()
+{
+	return result_type;
+}
+///////////////////////////////////////////////////////////////////////////////////
 
 Eval_Result_BB::Eval_Result_BB()
 {
@@ -290,7 +326,7 @@ void Local_Environment::print(ostream & file_buffer)
 			if (vi->is_variable_defined() == false)
 				file_buffer << VAR_SPACE << (*i).first << " : undefined" << "\n";
 		
-			else if(vi->get_result_enum() == int_result) 
+			else if(vi->get_result_enum() == int_result || vi->get_result_enum() == bool_result) 
 				file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value() << "\n";
 			
 			else if(vi->get_result_enum() == float_result) 
@@ -317,7 +353,7 @@ Eval_Result_Value * Local_Environment::get_variable_value(string name)
 
 void Local_Environment::put_variable_value(Eval_Result_Value & i, string name)
 {
-	variable_table[name] = &i;
+	variable_table[name] = &i; 
 }
 
 bool Local_Environment::does_variable_exist(string name)

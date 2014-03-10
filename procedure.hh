@@ -28,6 +28,8 @@
 #include<map>
 #include<list>
 
+#include "basic-block.hh"
+
 #define PROC_SPACE "   "
 #define LOC_VAR_SPACE "      "
 
@@ -40,9 +42,9 @@ class Procedure
 	Data_Type return_type;
 	string name;
 	Symbol_Table local_symbol_table;
-  Symbol_Table argument_symbol_table;
+	Symbol_Table argument_symbol_table;
 	list<Basic_Block *> basic_block_list;
-
+  
 public:
 	Procedure(Data_Type proc_return_type, string proc_name);
 	~Procedure();
@@ -50,18 +52,21 @@ public:
 	string get_proc_name();
 	void set_basic_block_list(list<Basic_Block *> bb_list);
 	void set_local_list(Symbol_Table & new_list);
-  void set_argument_list(Symbol_Table & arg_list);
+	void set_argument_list(Symbol_Table & arg_list);
 	Data_Type get_return_type();
 	Symbol_Table_Entry & get_symbol_table_entry(string variable_name);
 
 	void print_ast(ostream & file_buffer);
+	
+	bool check_argument_types(list<Ast *> & arg_types);
 
 	Basic_Block * get_next_bb(Basic_Block & current_bb);
-  Basic_Block * get_next_bb(int bb_no);
+	Basic_Block * get_next_bb(int bb_no);
 	Basic_Block & get_start_basic_block();
 
 	Eval_Result & evaluate(ostream & file_buffer);
-
+	Eval_Result & evaluate(list<Eval_Result *> & argument_value_list, ostream & file_buffer);
+ 
 	bool variable_in_symbol_list_check(string variable);
 };
 

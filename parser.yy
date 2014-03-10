@@ -49,9 +49,9 @@
 %token ASSIGN_OP NE EQ LT LE GT GE
 
 %type <symbol_table> declaration_statement_list
-%type <symbol_table> arguement_list
+%type <symbol_table> argument_list
 %type <symbol_entry> declaration_statement
-%type <symbol_entry> arguement
+%type <symbol_entry> argument
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
@@ -60,6 +60,7 @@
 %type <ast> assignment_statement
 %type <ast> if_else_statement
 %type <ast> goto_statement
+%type <ast> return_statement
 
 %type <ast> expression
 %type <ast> identifier
@@ -70,6 +71,7 @@
 %type <ast> arithmetic_expression
 %type <ast> comparison_expression
 %type <ast> equality_expression
+%type <ast> function_call
 
 %type <rel_op> comparison_operator
 %type <rel_op> equality_operator
@@ -93,11 +95,26 @@ procedure_list :
 ;
 
 procedure_declaration :
-	VOID procedure_name ';'
+	data_type NAME '(' ')' ';'
+	{
+		Procedure * proc = new Procedure(current_return_type, *$2);
+		program_object.set_procedure_map(*proc);			
+	}
 |
-	INTEGER procedure_name ';'
+	data_type NAME '(' argument_list ')' ';'
+	{
+		Procedure * proc = new Procedure(current_return_type, *$2);
+		proc->set_argument_list(*$4);
+		program_object.set_procedure_map(*proc);	
+	} 
+;
+
+data_type:
+	VOID		{ current_return_type = void_data_type; }  
 |
-	FLOAT procedure_name ';'
+	INTEGER		{ current_return_type = int_data_type; } 	
+|
+	FLOAT		{ current_return_type = float_data_type; }
 ;
 
 
@@ -119,8 +136,8 @@ procedure_definition_list:
 ;
 
 
-arguement_list:
-	arguement_list ',' arguement
+argument_list:
+	argument_list ',' argument
 	{
 		// if declaration is local then no need to check in global list
 		// if declaration is global then this list is global list
@@ -146,7 +163,7 @@ arguement_list:
 		$$->push_symbol($3);
 	}
 |
-	arguement
+	argument
 	{
 		int line = get_line_number();
 		program_object.variable_in_proc_map_check($1->get_variable_name(), line);
@@ -157,7 +174,7 @@ arguement_list:
 ;
 
 
-arguement:
+argument:
 	INTEGER NAME
 	{
 		$$ = new Symbol_Table_Entry(*$2, int_data_type);
@@ -166,7 +183,7 @@ arguement:
 |
 	FLOAT NAME
 	{
-		$$ = new Symbol_Table_Entry(*$2, int_data_type);
+		$$ = new Symbol_Table_Entry(*$2, float_data_type);
 		delete $2;
 	}
 ;
@@ -175,13 +192,12 @@ arguement:
 procedure_name:
 	NAME '(' ')'
 	{
-		current_procedure = new Procedure(void_data_type, *$1);
+		current_procedure = program_object.get_procedure(*$1);			
 	}
 |
-	NAME '(' arguement_list ')'
-	{
-		current_procedure = new Procedure(void_data_type, *$1);
-		current_procedure->set_argument_list(*$3);
+	NAME '(' argument_list ')'
+	{	
+		current_procedure = program_object.get_procedure(*$1);	
 	}
 ;
 
@@ -189,7 +205,7 @@ procedure_body:
 	'{' declaration_statement_list
 	{
 		current_procedure->set_local_list(*$2);
-		delete $2;
+		// delete $2;
 	}
 	basic_block_list '}'
 	{
@@ -219,6 +235,7 @@ procedure_body:
 	}
 ;
 
+
 declaration_statement_list:
 	declaration_statement
 	{
@@ -234,6 +251,9 @@ declaration_statement_list:
 
 		$$ = new Symbol_Table();
 		$$->push_symbol($1);
+		if(!current_procedure) {
+			program_object.set_global_table(*$$);
+		}
 	}
 |
 	declaration_statement_list declaration_statement
@@ -266,15 +286,25 @@ declaration_statement_list:
 			$$ = new Symbol_Table();
 
 		$$->push_symbol($2);
+		if(!current_procedure) {
+			program_object.set_global_table(*$$);
+		}
 	}
 ;
 
 declaration_statement:
-	INTEGER NAME ';'
+	data_type NAME ';'
 	{
-		$$ = new Symbol_Table_Entry(*$2, int_data_type);
+		if(current_return_type == void_data_type) 
+		{
+			int line = get_line_number();	
+			report_error("Variable is declared twice", line);
+		}
+		$$ = new Symbol_Table_Entry(*$2, current_return_type);
 		delete $2;
 	}
+;
+/*
 |
 	FLOAT NAME ';'
 	{
@@ -282,7 +312,7 @@ declaration_statement:
 		delete $2;
 	}
 ;
-
+*/
 basic_block_list:
 	basic_block_list basic_block
 	{
@@ -327,8 +357,6 @@ executable_statement_list:
 |
 	assignment_statement_list return_statement
 	{
-		Ast * ret = new Return_Ast();
-
 		return_statement_used_flag = true;					// Current procedure has an occurrence of return statement
 
 		if ($1 != NULL)
@@ -337,7 +365,7 @@ executable_statement_list:
 		else
 			$$ = new list<Ast *>;
 
-		$$->push_back(ret);
+		$$->push_back($2);
 	}
 |
 	assignment_statement_list 
@@ -389,6 +417,8 @@ assignment_statement_list:
 
 		else
 			$$ = $1;
+
+		$$->push_back($2);
 	}
 ;
 
@@ -421,8 +451,14 @@ goto_statement :
 
 return_statement :
 	RETURN ';'
+	{
+		$$ = new Return_Ast();
+	}
 |
 	RETURN expression ';'
+	{
+		$$ = new Return_Ast($2);
+	}
 ;	
 
 identifier :
@@ -450,7 +486,7 @@ unary_expression:
 	{ 
 		$$ = new Unary_Ast($2);
 		int line = get_line_number();
-		// $$->check_ast(line);
+		$$->check_ast(line);
 	} 
 |
 	'(' FLOAT ')' unary_expression 
@@ -476,18 +512,27 @@ unary_expression:
 		$$ = $1; 
 	} 
 |
-	function_call 
-	{
-		Ast * ret = new Return_Ast();
-		$$ = ret ;
+	function_call
+	{	
+		$$ = $1 ;
 	}
 ;
 
 
 function_call:
-	NAME '(' expression_list ')'
-|
+	NAME '(' expression_list ')' 
+	{
+		$$ = new Call_Ast(program_object.get_procedure(*$1), *$3);
+		int line = get_line_number();	
+		$$->check_ast(line);		
+	}	
+|	
 	NAME '(' ')'
+	{
+		$$ = new Call_Ast(program_object.get_procedure(*$1));
+		int line = get_line_number();
+		$$->check_ast(line);
+	}		
 ;
 
 multiplicative_expression:
@@ -495,14 +540,14 @@ multiplicative_expression:
 	{
 		$$ = new Multiplication_Ast($1, $3);
 		int line = get_line_number();
-		// $$->check_ast(line);
+		 $$->check_ast(line);
 	}
 |
 	multiplicative_expression '/' unary_expression
 	{
 		$$ = new Division_Ast($1, $3);
 		int line = get_line_number();
-		// $$->check_ast(line);
+		 $$->check_ast(line);
 	}
 |
 	unary_expression
@@ -516,14 +561,14 @@ additive_expression:
 	{
 		$$ = new Plus_Ast($1, $3);
 		int line = get_line_number();
-		// $$->check_ast(line);
+		 $$->check_ast(line);
 	}
 |
 	additive_expression '-'  multiplicative_expression
 	{
 		$$ = new Minus_Ast($1, $3);
 		int line = get_line_number();
-		// $$->check_ast(line);
+		 $$->check_ast(line);
 	}
 |	
 	multiplicative_expression { $$ = $1; }
@@ -538,7 +583,7 @@ comparison_expression :
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 		int line = get_line_number(); 
-		// $$->check_ast(line);
+		 $$->check_ast(line);
 	} 
 |
 	arithmetic_expression
@@ -550,7 +595,7 @@ equality_expression :
 	{
 		$$ = new Relational_Expr_Ast($1, $2, $3);
 		int line = get_line_number(); 
-		// $$->check_ast(line);
+		 $$->check_ast(line);
 	} 
 |
 	comparison_expression
@@ -594,7 +639,6 @@ variable:
 	NAME
 	{
 		Symbol_Table_Entry var_table_entry;
-
 		if (current_procedure->variable_in_symbol_list_check(*$1))
 			 var_table_entry = current_procedure->get_symbol_table_entry(*$1);
 
@@ -602,9 +646,9 @@ variable:
 			var_table_entry = program_object.get_symbol_table_entry(*$1);
 
 		else
-		{
-			// int line = get_line_number();
-			// report_error("Variable has not been declared", line);
+		{			 
+					 int line = get_line_number();
+					 report_error("Variable has not been declared", line);
 		}
 
 		$$ = new Name_Ast(*$1, var_table_entry);

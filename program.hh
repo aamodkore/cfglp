@@ -47,8 +47,10 @@ public:
 	void delete_all();
 
 	void set_procedure_map(Procedure & proc);
+	Procedure * get_procedure(string name);
 	void set_global_table(Symbol_Table & new_global_table);
-
+  
+  
 	Symbol_Table_Entry & get_symbol_table_entry(string variable);
 
 	void print_ast();

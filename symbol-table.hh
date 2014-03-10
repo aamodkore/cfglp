@@ -29,6 +29,7 @@
 
 using namespace std;
 
+class Ast;
 class Symbol_Table;
 class Symbol_Table_Entry;
 
@@ -62,8 +63,12 @@ public:
 	bool variable_in_symbol_list_check(string variable);
 	Symbol_Table_Entry & get_symbol_table_entry(string variable_name);
 	void global_list_in_proc_map_check(int line);
-
+	
+	list<Symbol_Table_Entry *>::iterator get_symbol_table_iterator();
 	void create(Local_Environment & local_global_variables_table);
+	
+	bool check_ordered_data_types(list<Ast *> & arg_types); /* Checks data types of the variables in order. Useful for
+								     function arguments where order is important. */
 };
 
 class Symbol_Table_Entry

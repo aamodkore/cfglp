@@ -36,9 +36,10 @@ using namespace std;
 
 #include"symbol-table.hh"
 
-#include"ast.hh"
+
 #include"basic-block.hh"
 #include"procedure.hh"
+#include"ast.hh"
 #include"program.hh"
 
 #include "parser.h"
