@@ -43,6 +43,10 @@ Symbol_Table::Symbol_Table()
 Symbol_Table::~Symbol_Table()
 {}
 
+int Symbol_Table::size() {
+	return variable_table.size();
+}
+
 void Symbol_Table::set_table_scope(Table_Scope list_scope)
 {
 	scope = list_scope;
@@ -102,25 +106,28 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
 		string name = (*i)->get_variable_name();
+		if(local_global_variables_table.does_variable_exist(name)) {
+			report_error("Variable " + name + " already exists in the current scope", NOLINE);
+		}
 		if( (*i)->get_data_type() == int_data_type) {  
-		  Eval_Result_Value_Int * j = new Eval_Result_Value_Int();
-		  if (scope == global)
-		    {
-		      j->set_variable_status(true);
-		      j->set_value(0);
-		    }
-		  
-		  local_global_variables_table.put_variable_value(*j, name);
+			Eval_Result_Value_Int * j = new Eval_Result_Value_Int();
+			if (scope == global)
+				{
+					j->set_variable_status(true);
+					j->set_value(0);
+				}
+			
+			local_global_variables_table.put_variable_value(*j, name);
 		}
 		else if( (*i)->get_data_type() == float_data_type || (*i)->get_data_type() == double_data_type) {  
-		  Eval_Result_Value_Float * j = new Eval_Result_Value_Float();
-		  if (scope == global)
-		    {
-		      j->set_variable_status(true);
-		      j->set_value_float(0.0);
-		    }
-		  
-		  local_global_variables_table.put_variable_value(*j, name);
+			Eval_Result_Value_Float * j = new Eval_Result_Value_Float();
+			if (scope == global)
+				{
+					j->set_variable_status(true);
+					j->set_value_float(0.0);
+				}
+			
+			local_global_variables_table.put_variable_value(*j, name);
 		}
 	}
 }
@@ -135,6 +142,25 @@ bool Symbol_Table::check_ordered_data_types(list<Ast *> & arg_types) {
 	for (itr_s = variable_table.begin(); itr_s != variable_table.end(); itr_s++, itr_d++)
 	{
 		if( (*itr_s)->get_data_type() != (*itr_d)->get_data_type() ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool Symbol_Table::check_ordered_data_types(Symbol_Table & arg_types) {
+	list<Symbol_Table_Entry *>::iterator itr_s;
+	list<Symbol_Table_Entry *>::iterator itr_d = arg_types.get_symbol_table_iterator();
+	
+	if(variable_table.size() != arg_types.size()) {
+		return false;
+	}
+	for (itr_s = variable_table.begin(); itr_s != variable_table.end(); itr_s++, itr_d++)
+	{
+		if( (*itr_s)->get_data_type() != (*itr_d)->get_data_type() ) {
+			return false;
+		}
+		if( (*itr_s)->get_variable_name() != (*itr_d)->get_variable_name() ) {
 			return false;
 		}
 	}

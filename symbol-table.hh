@@ -55,6 +55,7 @@ public:
 	Symbol_Table();
 	~Symbol_Table();
 
+	int size();
 	Table_Scope get_table_scope();
 	void set_table_scope(Table_Scope list_scope);
 
@@ -69,6 +70,7 @@ public:
 	
 	bool check_ordered_data_types(list<Ast *> & arg_types); /* Checks data types of the variables in order. Useful for
 								     function arguments where order is important. */
+	bool check_ordered_data_types(Symbol_Table & arg_types);
 };
 
 class Symbol_Table_Entry

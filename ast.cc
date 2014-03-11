@@ -175,10 +175,14 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer) 
 }
 
 Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env) {
-	if (eval_env.does_variable_exist(variable_name))
-	{
-		Eval_Result * result = eval_env.get_variable_value(variable_name);
-		return *result;
+	if (eval_env.does_variable_exist(variable_name)) {
+		if(eval_env.is_variable_defined(variable_name)) {
+			Eval_Result * result = eval_env.get_variable_value(variable_name);
+			return *result;
+		}
+		else {
+			report_error("Variable " + variable_name +  " not defined", NOLINE); 
+		}	  
 	}
 
 	Eval_Result * result = interpreter_global_table.get_variable_value(variable_name);
@@ -272,7 +276,6 @@ Return_Ast::Return_Ast(Ast * ret) {
 	return_exp = ret;
 }
 
-
 Return_Ast::~Return_Ast() {}
 
 void Return_Ast::print_ast(ostream & file_buffer) {
@@ -288,7 +291,7 @@ void Return_Ast::print_ast(ostream & file_buffer) {
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	file_buffer << endl;
-	print_ast(file_buffer);
+	print_ast(file_buffer); 
 	if(return_exp != NULL) {
 		//cout << "Ret value must be here\n";
 		//cout << return_exp->get_data_type() << " is the data type\n";

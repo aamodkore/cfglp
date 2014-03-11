@@ -460,18 +460,6 @@ Call_Ast::Call_Ast(Procedure * f) {
   node_data_type = void_data_type;
 }
 
-bool Call_Ast::check_ast(int line) {
-	node_data_type = fn->get_return_type();
-	if(arguments.size() == 0) {
-		/* Function call with no arguments */
-		return true;
-	}
-	bool check = fn->check_argument_types(arguments);
-	if(check == false) {
-		report_error("Arguments type is not same as declaration in " + fn->get_proc_name(), NOLINE);
-	}
-	return check;
-}
 
 Data_Type Call_Ast::get_data_type() {
   return node_data_type;
@@ -488,6 +476,15 @@ void Call_Ast::print_ast(ostream & file_buffer) {
 		(*itr_arg)->print_ast(file_buffer);
 	}
 	file_buffer << ")";
+}
+
+bool Call_Ast::check_ast(int line) {
+	node_data_type = fn->get_return_type();
+	bool check = fn->check_argument_types(arguments);
+	if(check == false) {
+		report_error("Arguments type is not same as declaration in " + fn->get_proc_name(), line);
+	}
+	return check;
 }
 
 Eval_Result & Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){

@@ -94,15 +94,13 @@ Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 }
 
 bool Procedure::check_argument_types(list<Ast *> & arg_types) {
-	bool check = argument_symbol_table.check_ordered_data_types(arg_types);
-	if(check == false) {
-		report_error("Function " + name + " usage does not match declaration", NOLINE);
-	}
-	return check;
+	return argument_symbol_table.check_ordered_data_types(arg_types);
 }
 	
-
-
+bool Procedure::check_argument_types(Symbol_Table & arg_types) {
+        return argument_symbol_table.check_ordered_data_types(arg_types);
+}
+    
 void Procedure::print_ast(ostream & file_buffer)
 {
 	file_buffer << PROC_SPACE << "Procedure: " << name << "\n\n";

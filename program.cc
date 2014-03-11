@@ -145,3 +145,8 @@ Eval_Result & Program::evaluate()
 
 	return result;
 }
+
+bool Program::is_procedure_declared(string name) {
+	if(procedure_map.count(name) != 0) return true;
+	else return false;
+}

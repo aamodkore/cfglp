@@ -97,12 +97,28 @@ procedure_list :
 procedure_declaration :
 	data_type NAME '(' ')' ';'
 	{
+		if(program_object.is_procedure_declared(*$2)) {
+			int line = get_line_number();
+			report_error("Procedure " + *$2 + " already declared\n", line);
+		}
+		if(program_object.variable_in_symbol_list_check(*$2)) {
+			int line = get_line_number();
+			report_error("Procedure " + *$2 + " same as global variable " + *$2 , line);
+		}
 		Procedure * proc = new Procedure(current_return_type, *$2);
 		program_object.set_procedure_map(*proc);			
 	}
 |
 	data_type NAME '(' argument_list ')' ';'
 	{
+		if(program_object.is_procedure_declared(*$2)) {
+			int line = get_line_number();
+			report_error("Procedure " + *$2 + " already declared\n", line);
+		}
+		if(program_object.variable_in_symbol_list_check(*$2)) {
+			int line = get_line_number();
+			report_error("Procedure " + *$2 + " same as global variable " + *$2 , line);
+		}
 		Procedure * proc = new Procedure(current_return_type, *$2);
 		proc->set_argument_list(*$4);
 		program_object.set_procedure_map(*proc);	
@@ -192,14 +208,29 @@ argument:
 procedure_name:
 	NAME '(' ')'
 	{
-		current_procedure = program_object.get_procedure(*$1);			
+		current_procedure = program_object.get_procedure(*$1);	
+		// Dummy symbol table.
+		Symbol_Table * symtab = new Symbol_Table();
+		bool check = current_procedure->check_argument_types(*symtab);
+		if(!check) {
+			   int line = get_line_number();
+			   report_error("Function " + current_procedure->get_proc_name() 
+			   + " actual parameters does not match formal parameters in declaration", line);
+		}
+		delete symtab;		
 	}
 |
 	NAME '(' argument_list ')'
 	{	
 		current_procedure = program_object.get_procedure(*$1);	
+		bool check = current_procedure->check_argument_types(*$3);
+		if(!check) {
+			   int line = get_line_number();
+			   report_error("Function " + current_procedure->get_proc_name() 
+			   + " actual parameters does not match formal parameters in declaration", line);
+		}
 	}
-;
+;	
 
 procedure_body:
 	'{' declaration_statement_list
@@ -209,12 +240,13 @@ procedure_body:
 	}
 	basic_block_list '}'
 	{
+	        /*		
 		if (return_statement_used_flag == false)
 		{
 			int line = get_line_number();
 			report_error("Atleast 1 basic block should have a return statement", line);
 		}
-
+		*/
 		current_procedure->set_basic_block_list(*$4);
 
 		delete $4;
@@ -458,6 +490,9 @@ return_statement :
 	RETURN expression ';'
 	{
 		$$ = new Return_Ast($2);
+		if(current_procedure->get_return_type() != ($2)->get_data_type()) {
+			report_error("Return value does not match procedure declaration", get_line_number());
+		}
 	}
 ;	
 

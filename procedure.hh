@@ -59,6 +59,7 @@ public:
 	void print_ast(ostream & file_buffer);
 	
 	bool check_argument_types(list<Ast *> & arg_types);
+	bool check_argument_types(Symbol_Table & arg_types);
 
 	Basic_Block * get_next_bb(Basic_Block & current_bb);
 	Basic_Block * get_next_bb(int bb_no);
