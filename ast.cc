@@ -552,6 +552,7 @@ Eval_Result & Unconditional_Goto_Ast::evaluate(Local_Environment & eval_env, ost
 }
 
 Code_For_Ast & Unconditional_Goto_Ast::compile(){
+	CHECK_INVARIANT((curr_procedure->basic_block_exists(block_no)), "Basic Block does not exist");
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
 	ic_list.push_back(new Control_Flow_IC_Stmt(block_no));
 	Code_For_Ast & goto_code = *new Code_For_Ast(ic_list, NULL);
@@ -620,9 +621,9 @@ Code_For_Ast & Conditional_Goto_Ast::compile() {
 	   (bne) R, 0, label1
 	   (jump) label2
 	*/
-
 	CHECK_INVARIANT((condition != NULL), "Condition cannot be null");
-
+	CHECK_INVARIANT((curr_procedure->basic_block_exists(if_goto)), "If Basic Block does not exist");
+	CHECK_INVARIANT((curr_procedure->basic_block_exists(else_goto)), "Else Basic Block does not exist");
 	Code_For_Ast & condition_stmt = condition->compile();
 	Register_Descriptor * condition_register = condition_stmt.get_reg();
 

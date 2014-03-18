@@ -34,6 +34,7 @@
 using namespace std;
 
 class Procedure;
+extern Procedure *  curr_procedure;
 
 class Procedure
 {
@@ -64,6 +65,7 @@ public:
 	Eval_Result & evaluate(ostream & file_buffer);
 
 	bool variable_in_symbol_list_check(string variable);
+	bool basic_block_exists(int no);
 
 	// compile
 	void compile();
@@ -74,5 +76,7 @@ private:
 	void print_prologue(ostream & file_buffer);
 	void print_epilogue(ostream & file_buffer);
 };
+
+
 
 #endif

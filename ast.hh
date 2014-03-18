@@ -38,6 +38,8 @@ using namespace std;
 class Procedure;
 class Ast;
 
+extern Procedure * curr_procedure;
+
 enum Relational_Operator { 
 	greater_than_op, greater_equals_op, 
 	less_than_op, less_equals_op, 

@@ -39,6 +39,8 @@ using namespace std;
 #include"procedure.hh"
 #include"program.hh"
 
+Procedure * curr_procedure;
+
 Procedure::Procedure(Data_Type proc_return_type, string proc_name, int line)
 {
 	return_type = proc_return_type;
@@ -131,6 +133,16 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 	return NULL;
 }
 
+bool Procedure::basic_block_exists(int no) {	
+	list<Basic_Block *>::iterator i;
+	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++) {
+		if((*i)->get_bb_number() == no) {
+			return true;
+		}
+	}
+	return false;
+}
+
 Eval_Result & Procedure::evaluate(ostream & file_buffer)
 {
 	Local_Environment & eval_env = *new Local_Environment();
@@ -159,6 +171,7 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 
 void Procedure::compile()
 {
+	curr_procedure = this;
 	// assign offsets to local symbol table
 	local_symbol_table.set_start_offset_of_first_symbol(4);
 	local_symbol_table.set_size(4);
