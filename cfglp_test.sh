@@ -1,7 +1,14 @@
-for file in `ls ./cfg/*.cfg`;
+for file in `ls $1/*.cfg`;
 do
-    ./cfglp $file -tokens -d > act.tmp.out;
-    ./cfglp64 $file -tokens -d > exp.tmp.out;
-    diff act.tmp.out exp.tmp.out;
-    rm -rf *.tmp.out;
+    echo "Diff for " $file ": "
+    ./cfglp $file $4 $2 $3;
+    mv $file.ic act.ic.out;
+    mv $file.spim act.spim.out;	   
+    ./cfglp64 $file $4 $2 $3;
+    mv $file.ic exp.ic.out;
+    mv $file.spim exp.spim.out;	
+    diff -b -B act.ic.out exp.ic.out;
+    diff -b -B act.spim.out exp.spim.out;
+    rm -rf *.*.out ;
 done
+

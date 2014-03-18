@@ -1,24 +1,19 @@
 main()
 {
-   int c;
    int b;
    int a;
 
 <bb 2>:
-   a = 4;
-   b = 3;
-   c = 3;
-   if(a > b >= c)
       goto <bb 3>;
    else
       goto <bb 4>;
 
 <bb 3>:
-   a = 6;
+   a = 4;
    goto <bb 5>;
 
 <bb 4>:
-   b = 6;
+   b = 4;
 
 <bb 5>:
    return;

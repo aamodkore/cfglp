@@ -1,24 +1,22 @@
 main()
 {
-   int c;
    int b;
    int a;
+   int iftmp1;
+   int iftmp0;
 
 <bb 2>:
-   a = 3;
-   b = 4;
-   c = 2;
-   if(a > 2)
-      goto <bb 3>;
+   if(a != 0)
+      a=1;
    else
       goto <bb 4>;
 
 <bb 3>:
-   c = a > b > c;
+   a=1;
    goto <bb 5>;
 
 <bb 4>:
-   c = a > b > c;
+   a=2;
 
 <bb 5>:
    return;

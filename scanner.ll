@@ -50,13 +50,35 @@ goto		{
 			store_token_name("GOTO");
 			return Parser::GOTO;	
 		}
-		
-[<]bb[ ][0-9]+[>]	{ 
-				store_token_name("BASIC BLOCK");
+
+[-]?[[:digit:]]+ 	{ 
+				store_token_name("NUM");
+
 				ParserBase::STYPE__ * val = getSval();
-				matched().substr(4, matched().find(">") - 4);
-				val->integer_value = atoi(matched().substr(4, matched().find(">") - 4).c_str());
-				return Parser::BB;
+				val->integer_value = atoi(matched().c_str());
+
+				return Parser::INTEGER_NUMBER; 
+			}
+
+[[:alpha:]_][[:alpha:][:digit:]_]* {
+					store_token_name("NAME");
+
+					ParserBase::STYPE__ * val = getSval();
+					val->string_value = new std::string(matched());
+
+					return Parser::NAME; 
+				}
+
+"<bb "[[:digit:]]+">"	{
+				store_token_name("BASIC BLOCK");
+
+				string bb_num_str = matched().substr(4, matched().length() - 2);
+				CHECK_INPUT_AND_ABORT((atoi(bb_num_str.c_str()) >= 2), "Illegal basic block lable", lineNr());
+
+				ParserBase::STYPE__ * val = getSval();
+				val->integer_value = atoi(bb_num_str.c_str());
+
+				return Parser::BBNUM;
 			}
 
 ">=" 			{ 
@@ -83,10 +105,12 @@ goto		{
 				store_token_name("EQ");
 				return Parser::EQ;
 			}	
-"="			{
+
+"="			{		
 				store_token_name("ASSIGN_OP");
-				return Parser::ASSIGN_OP;
-			}	
+				return Parser::ASSIGN;
+			}
+
 
 [:{}();]	{
 			store_token_name("META CHAR");
@@ -94,30 +118,10 @@ goto		{
 		}
 
 
-[-]?[[:digit:]_]+ 	{ 
-				store_token_name("NUM");
-
-				ParserBase::STYPE__ * val = getSval();
-				val->integer_value = atoi(matched().c_str());
-
-				return Parser::INTEGER_NUMBER; 
-			}
-
-[[:alpha:]_][[:alpha:][:digit:]_]* {
-					store_token_name("NAME");
-
-					ParserBase::STYPE__ * val = getSval();
-					val->string_value = new std::string(matched());
-
-					return Parser::NAME; 
-				}
-
-\n		{ 
-			if (command_options.is_show_tokens_selected())
-				ignore_token();
-		}    
-
+\n    		|
 ";;".*  	|
+[ \t]*";;".*	|
+[ \t]*"//".*	|
 [ \t]		{
 			if (command_options.is_show_tokens_selected())
 				ignore_token();
@@ -128,6 +132,5 @@ goto		{
 			error_message =  "Illegal character `" + matched();
 			error_message += "' on line " + lineNr();
 			
-			int line_number = lineNr();
-			report_error(error_message, line_number);
+			CHECK_INPUT(CONTROL_SHOULD_NOT_REACH, error_message, lineNr());
 		}

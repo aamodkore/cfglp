@@ -39,15 +39,23 @@ class Basic_Block
 	int id_number;
 	list<Ast *> statement_list;
 
+	list<Icode_Stmt *> bb_icode_list;
+
+	int lineno;
+
 public:
-	Basic_Block(int basic_block_number, list<Ast *> & ast_list);
+	Basic_Block(int basic_block_number, int line);
 	~Basic_Block();
 
 	int get_bb_number();
+	void set_ast_list(list<Ast *> & ast_list);
 
 	void print_bb(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	// compile
+	list<Icode_Stmt *> & compile();
 };
 
 #endif
