@@ -51,7 +51,6 @@ typedef enum
 	a_op_r_o1_o2,	/* r <- o1 op o2 */ 
 	a_op_o1_o2_r,	/* r <- o1 op o2 */
 	a_label,        /* Label x: */
-	a_jump,          /* jump label x */
 	a_branch,        /* branch op op1 op2 label */
 	a_nsy		/* not specified yet */
 } Assembly_Format;
@@ -67,7 +66,6 @@ typedef enum
 	i_r_r_op_o1,	/* r <- r op o1 */
 	i_r_o1_op_o2,	/* r <- o1 op o2 */
 	i_label,        /* Label x: */
-	i_jump,         /* jump label x */
 	i_branch,       /* branch op op1 op2 label */
 	i_nsy		/* not specified yet */
 } Icode_Format;

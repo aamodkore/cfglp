@@ -367,7 +367,7 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer) {
 	string op_name = op_desc.get_name();
 	switch (ic_format)
 	{
-	case i_jump: 
+	case i_op_o1: 
 		file_buffer << " " <<  op_name << " label" << label_no ;
 		file_buffer << "\n";
 		break; 
@@ -391,7 +391,7 @@ void Control_Flow_IC_Stmt::print_assembly(ostream & file_buffer) {
 	Assembly_Format assem_format = op_desc.get_assembly_format();
 	switch (assem_format)
 	{
-	case a_jump: 
+	case a_op_o1: 
 		file_buffer << "\t" << op_name << " label" << label_no << endl;
 		break; 
 	case a_branch:
