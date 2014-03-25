@@ -293,9 +293,11 @@ void Symbol_Table_Entry::free_register(Register_Descriptor * destination_reg_des
   // CHECK_INVARIANT((destination_reg_descr != NULL), 
   //			"The register descriptor of the destination should not be NULL while freeing a register");
 
+  // cout << variable_name << " Freeing reg " << destination_reg_descr->get_name() << endl;
 	/* Remove the destination from its register descriptor */
 	destination_reg_descr->remove_symbol_entry_from_list(*this);
-
+	destination_reg_descr->reset_use_for_expr_result();
+	
 	/* Remove the register descriptor from the destination */
 	set_register(NULL);
 }
@@ -305,7 +307,8 @@ void Symbol_Table_Entry::update_register(Register_Descriptor * result_reg_descr)
 	CHECK_INVARIANT((result_reg_descr != NULL), 
 			"The register descriptor of the result should not be NULL while updating register information");
 
-	Register_Descriptor * destination_reg_descr = get_register();
+	//	cout << variable_name << "Updating to register " << result_reg_descr->get_name() << endl;
+	// Register_Descriptor * destination_reg_descr = get_register();
 
 	// CHECK_INVARIANT ((destination_reg_descr == NULL), 
 	//		"The destination register should have been freed");
