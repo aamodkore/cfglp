@@ -103,9 +103,9 @@ list<Icode_Stmt *> & Basic_Block::compile()
 		if (typeid(*ast) != typeid(Return_Ast))
 		{
 			if (command_options.is_do_lra_selected() == true)
-			{
-				Lra_Outcome lra;
-				ast_code = ast->compile_and_optimize_ast(lra);
+			  {
+			    Lra_Outcome lra;
+			    ast_code = ast->compile_and_optimize_ast(lra);
 			}
 
 			else if (command_options.is_do_compile_selected() == true)

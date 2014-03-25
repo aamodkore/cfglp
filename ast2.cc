@@ -158,8 +158,7 @@ Code_For_Ast & Relational_Expr_Ast::compile(){
 		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
 	
 	Register_Descriptor * result_reg = machine_dscr_object.get_new_register();
-	string * rel = new string("rel");
-	result_reg->update_symbol_information(*new Symbol_Table_Entry(*rel, int_data_type, 1));
+	result_reg->set_used_for_expr_result();
 	Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
 
 	switch(relational_op) {
@@ -184,12 +183,80 @@ Code_For_Ast & Relational_Expr_Ast::compile(){
 	}
 	
 	// Free the previous result register.
+	lreg->reset_use_for_expr_result();
 	lreg->clear_lra_symbol_list();
+	rreg->reset_use_for_expr_result();
 	rreg->clear_lra_symbol_list();
 	Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
 	return rel_expr_code;
 }
-Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra){}
+Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+	CHECK_INVARIANT((lhs != NULL), "LHS cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+	
+	Register_Descriptor * result_reg = NULL;
+	/*
+	if(lra.is_destination_register()) {
+	 // cout << "Inherited from above\n";
+	  result_reg = lra.get_register();
+	}
+	else {
+	   result_reg = NULL;
+	}
+	*/ 
+
+	lra.optimize_lra(mc_2r, NULL, lhs);
+	Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+	Register_Descriptor * lreg = lhs_stmt.get_reg();
+
+	lra.optimize_lra(mc_2r, NULL, rhs);
+	Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+	Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+	Ics_Opd * lhs_reg = new Register_Addr_Opd(lreg);
+	Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+	
+	if (lhs_stmt.get_icode_list().empty() == false)
+		ic_list = lhs_stmt.get_icode_list();
+	if (rhs_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+	
+	//	cout << "In Relational\n";
+	if(result_reg == NULL) {
+	  result_reg = machine_dscr_object.get_new_register();
+	}
+	result_reg->set_used_for_expr_result();
+	Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+	switch(relational_op) {
+	case greater_than_op   : 
+		ic_list.push_back(new Compute_IC_Stmt(sgt, register_result, lhs_reg, rhs_reg)) ;
+		break ;
+	case greater_equals_op : 
+		ic_list.push_back(new Compute_IC_Stmt(sge, register_result, lhs_reg, rhs_reg)) ;
+		break ;
+	case less_than_op      : 
+		ic_list.push_back(new Compute_IC_Stmt(slt, register_result, lhs_reg, rhs_reg)) ;
+		break ;
+	case less_equals_op    : 
+		ic_list.push_back(new Compute_IC_Stmt(sle, register_result, lhs_reg, rhs_reg)) ;
+		break ;
+	case equals_op         : 
+		ic_list.push_back(new Compute_IC_Stmt(seq, register_result, lhs_reg, rhs_reg)) ;
+		break ;
+	case not_equals_op     : 
+		ic_list.push_back(new Compute_IC_Stmt(sne, register_result, lhs_reg, rhs_reg)) ;
+		break ;
+	}
+	
+	// Free the previous result register.
+	lreg->reset_use_for_expr_result();
+	rreg->reset_use_for_expr_result();
+	Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+	return rel_expr_code;
+}
 
 /********************************************************************************/
 Arithmetic_Expr_Ast::Arithmetic_Expr_Ast() {}

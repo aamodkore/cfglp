@@ -76,7 +76,7 @@ class Register_Descriptor
     list<Symbol_Table_Entry *> lra_symbol_list;
     bool used_for_expr_result;
 
-  public:
+public:
     Register_Descriptor (Spim_Register reg, string nam, Register_Val_Type vt, Register_Use_Category uc);
     Register_Descriptor() {}
     ~Register_Descriptor() {}
@@ -90,10 +90,12 @@ class Register_Descriptor
     Register_Use_Category get_use_category(); 
     Spim_Register get_register();
 
+  int associations();
     string get_name();
     void clear_lra_symbol_list();
 
     bool get_used_for_expr_result();
+    void set_used_for_expr_result();
     void reset_use_for_expr_result();
 
     bool is_free();

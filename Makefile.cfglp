@@ -41,6 +41,7 @@ BISONCPP = bisonc++
 FLEXCPP = flexc++
 TGT = cfglp
 
+SUBMIT_DIR = 110050003-110050004
 CFLAGS = -g 
 
 $(TGT): $(OBJ) 
@@ -59,6 +60,11 @@ clean :
 	rm -f *.o scannerbase.h parserbase.h scanner.cc parser.cc parser.yy.output
 	rm -f cscope.out tags a.out
 
+submit : clean
+	mkdir -p $(SUBMIT_DIR)
+	cp -r *.hh *.cc *.h *.ih *.ll *.yy Makefile* *64* test_files submit/* $(SUBMIT_DIR)
+	tar zcvf $(SUBMIT_DIR).tgz $(SUBMIT_DIR)
+	rm -rf $(SUBMIT_DIR)
 ###########################################################################
 
 check:

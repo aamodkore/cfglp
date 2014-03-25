@@ -178,7 +178,7 @@ Code_For_Ast & Assignment_Ast::compile()
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
 
 	Code_For_Ast & load_stmt = rhs->compile();
-
+	
 	Register_Descriptor * load_register = load_stmt.get_reg();
 
 	Code_For_Ast store_stmt = lhs->create_store_stmt(load_register);
@@ -204,8 +204,9 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
-
+	
 	lra.optimize_lra(mc_2m, lhs, rhs);
+
 	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
 
 	Register_Descriptor * result_register = load_stmt.get_reg();
@@ -345,7 +346,6 @@ Code_For_Ast & Name_Ast::compile()
 	
 	Icode_Stmt * load_stmt = new Move_IC_Stmt(load, opd, register_opd);
 	
-	
 	list<Icode_Stmt *> ic_list;
 	ic_list.push_back(load_stmt);
 
@@ -366,8 +366,13 @@ Code_For_Ast & Name_Ast::create_store_stmt(Register_Descriptor * store_register)
 	if (command_options.is_do_lra_selected() == false) 
 	  {
 	    variable_symbol_entry->free_register(store_register);
-	     store_register->clear_lra_symbol_list();
+	    store_register->clear_lra_symbol_list();
+	    store_register->reset_use_for_expr_result();
 	  }
+	else {
+	  variable_symbol_entry->free_register(variable_symbol_entry->get_register());
+	  variable_symbol_entry->update_register(store_register);
+	}
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
 	ic_list.push_back(store_stmt);
 
@@ -381,9 +386,9 @@ Code_For_Ast & Name_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;;
 
 	bool load_needed = lra.is_load_needed();
-
 	Register_Descriptor * result_register = lra.get_register();
 	CHECK_INVARIANT((result_register != NULL), "Register cannot be null");
+	// cout << "Variable " << variable_symbol_entry->get_variable_name() << " alloted reg: " << result_register->get_name() << endl;
 	Ics_Opd * register_opd = new Register_Addr_Opd(result_register);
 
 	Icode_Stmt * load_stmt = NULL;
@@ -451,8 +456,7 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile()
 	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	
-	string * cons = new string("constant");
-	result_register->update_symbol_information(*new Symbol_Table_Entry(*cons,int_data_type,0));
+	result_register->set_used_for_expr_result();
 	Ics_Opd * load_register = new Register_Addr_Opd(result_register);
 	Ics_Opd * opd = new Const_Opd<int>(constant);
 
@@ -470,11 +474,13 @@ template <class DATA_TYPE>
 Code_For_Ast & Number_Ast<DATA_TYPE>::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	CHECK_INVARIANT((lra.get_register() != NULL), "Register assigned through optimize_lra cannot be null");
+	lra.get_register()->set_used_for_expr_result();
+
 	Ics_Opd * load_register = new Register_Addr_Opd(lra.get_register());
 	Ics_Opd * opd = new Const_Opd<int>(constant);
 
 	Icode_Stmt * load_stmt = new Move_IC_Stmt(imm_load, opd, load_register);
-
+	
 	list<Icode_Stmt *> ic_list;
 	ic_list.push_back(load_stmt);
 
@@ -559,6 +565,11 @@ Code_For_Ast & Unconditional_Goto_Ast::compile(){
 	return goto_code;
 }
 Code_For_Ast & Unconditional_Goto_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+  	CHECK_INVARIANT((curr_procedure->basic_block_exists(block_no)), "Basic Block does not exist");
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	ic_list.push_back(new Control_Flow_IC_Stmt(block_no));
+	Code_For_Ast & goto_code = *new Code_For_Ast(ic_list, NULL);
+	return goto_code;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -640,4 +651,23 @@ Code_For_Ast & Conditional_Goto_Ast::compile() {
 	Code_For_Ast & cond_code = *new Code_For_Ast(ic_list, NULL);
 	return cond_code;
 }
-Code_For_Ast & Conditional_Goto_Ast::compile_and_optimize_ast(Lra_Outcome & lra){}
+Code_For_Ast & Conditional_Goto_Ast::compile_and_optimize_ast(Lra_Outcome & lra){
+  CHECK_INVARIANT((condition != NULL), "Condition cannot be null");
+	CHECK_INVARIANT((curr_procedure->basic_block_exists(if_goto)), "If Basic Block does not exist");
+	CHECK_INVARIANT((curr_procedure->basic_block_exists(else_goto)), "Else Basic Block does not exist");
+	Code_For_Ast & condition_stmt = condition->compile_and_optimize_ast(lra);
+	Register_Descriptor * condition_register = condition_stmt.get_reg();
+
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	
+	if (condition_stmt.get_icode_list().empty() == false)
+		ic_list = condition_stmt.get_icode_list();
+	
+	Ics_Opd * zero = new Register_Addr_Opd(machine_dscr_object.get_zero_register());
+	Ics_Opd * cond_reg = new Register_Addr_Opd(condition_register);
+	ic_list.push_back(new Control_Flow_IC_Stmt(bne, cond_reg, zero, if_goto));
+	ic_list.push_back(new Control_Flow_IC_Stmt(else_goto));
+	
+	Code_For_Ast & cond_code = *new Code_For_Ast(ic_list, NULL);
+	return cond_code;
+}

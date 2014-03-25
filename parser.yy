@@ -65,13 +65,13 @@
 %type <ast> expression
 %type <ast> identifier
 %type <ast> primary_expression
-%type <ast> unary_expression
+//%type <ast> unary_expression
 %type <ast> multiplicative_expression
 %type <ast> additive_expression
 %type <ast> arithmetic_expression
 %type <ast> comparison_expression
 %type <ast> equality_expression
-%type <ast> function_call
+//%type <ast> function_call
 
 %type <rel_op> comparison_operator
 %type <rel_op> equality_operator

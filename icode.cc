@@ -91,7 +91,10 @@ void Mem_Addr_Opd::print_asm_opd(ostream & file_buffer)
 	if (symbol_scope == local)
 	{
 		int offset = symbol_entry->get_start_offset();
-		file_buffer << offset << "($fp)";
+		if(offset <= 0)  
+			file_buffer << offset << "($fp)";
+		else
+			file_buffer << "-" << offset << "($fp)";
 	}
 	else
 		file_buffer << symbol_entry->get_variable_name();
@@ -263,7 +266,7 @@ void Move_IC_Stmt::print_assembly(ostream & file_buffer)
 	switch (assem_format)
 	{
 	case a_op_r_o1: 
-			file_buffer << "\t" << op_name << ", ";
+			file_buffer << "\t" << op_name << " ";
 			result->print_asm_opd(file_buffer);
 			file_buffer << ", ";
 			opd1->print_asm_opd(file_buffer);
@@ -272,7 +275,7 @@ void Move_IC_Stmt::print_assembly(ostream & file_buffer)
 			break; 
 
 	case a_op_o1_r: 
-			file_buffer << "\t" << op_name << ", ";
+	  file_buffer << "\t" << op_name << " ";
 			opd1->print_asm_opd(file_buffer);
 			file_buffer << ", ";
 			result->print_asm_opd(file_buffer);
@@ -425,7 +428,7 @@ Compute_IC_Stmt::~Compute_IC_Stmt()
 Instruction_Descriptor & Compute_IC_Stmt::get_inst_op_of_ics() {}
 
 void Compute_IC_Stmt::print_icode(ostream & file_buffer) {
-	CHECK_INVARIANT (l_opd, "Left Opd cannot be NULL for a Compute IC Stmt");
+  CHECK_INVARIANT (l_opd, "Left Opd cannot be NULL for a Compute IC Stmt");
 	CHECK_INVARIANT (r_opd, "Right Opd cannot be NULL for a Compute IC Stmt");
 	CHECK_INVARIANT (result, "Result cannot be NULL for a Compute IC Stmt");
 
