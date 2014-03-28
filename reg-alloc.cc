@@ -313,11 +313,15 @@ void Machine_Description::initialize_instruction_table()
 	spim_instruction_table[jump] = new Instruction_Descriptor(jump, "goto", "j", "", i_op_o1, a_op_o1);
 	spim_instruction_table[bne] = new Instruction_Descriptor(bne, "bne", "bne", "", i_branch, a_branch);
 	spim_instruction_table[seq] = new Instruction_Descriptor(seq, "seq", "seq", "", i_r_o1_op_o2, a_op_r_o1_o2);
-        spim_instruction_table[sne] = new Instruction_Descriptor(seq, "sne", "sne", "", i_r_o1_op_o2, a_op_r_o1_o2);
-        spim_instruction_table[slt] = new Instruction_Descriptor(seq, "slt", "slt", "", i_r_o1_op_o2, a_op_r_o1_o2);
-        spim_instruction_table[sle] = new Instruction_Descriptor(seq, "sle", "sle", "", i_r_o1_op_o2, a_op_r_o1_o2); 
-        spim_instruction_table[sgt] = new Instruction_Descriptor(seq, "sgt", "sgt", "", i_r_o1_op_o2, a_op_r_o1_o2);            
-        spim_instruction_table[sge] = new Instruction_Descriptor(seq, "sge", "sge", "", i_r_o1_op_o2, a_op_r_o1_o2);                         
+    spim_instruction_table[sne] = new Instruction_Descriptor(sne, "sne", "sne", "", i_r_o1_op_o2, a_op_r_o1_o2);
+     spim_instruction_table[slt] = new Instruction_Descriptor(slt, "slt", "slt", "", i_r_o1_op_o2, a_op_r_o1_o2);
+    spim_instruction_table[sle] = new Instruction_Descriptor(sle, "sle", "sle", "", i_r_o1_op_o2, a_op_r_o1_o2); 
+    spim_instruction_table[sgt] = new Instruction_Descriptor(sgt, "sgt", "sgt", "", i_r_o1_op_o2, a_op_r_o1_o2);            
+    spim_instruction_table[sge] = new Instruction_Descriptor(sge, "sge", "sge", "", i_r_o1_op_o2, a_op_r_o1_o2);  
+    spim_instruction_table[add] = new Instruction_Descriptor(add, "add", "add", "", i_r_o1_op_o2, a_op_r_o1_o2);
+    spim_instruction_table[sub] = new Instruction_Descriptor(sub, "sub", "sub", "", i_r_o1_op_o2, a_op_r_o1_o2);
+    spim_instruction_table[mul] = new Instruction_Descriptor(mul, "mul", "mul", "", i_r_o1_op_o2, a_op_r_o1_o2);
+    spim_instruction_table[divide] = new Instruction_Descriptor(divide, "div", "div", "", i_r_o1_op_o2, a_op_r_o1_o2);
 }
 
 

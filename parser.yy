@@ -43,7 +43,7 @@
 
 %token <integer_value> INTEGER_NUMBER BBNUM
 %token <string_value> NAME
-%token RETURN INTEGER IF ELSE GOTO
+%token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO
 %token ASSIGN NE EQ LT LE GT GE
 
 
@@ -65,7 +65,7 @@
 %type <ast> expression
 %type <ast> identifier
 %type <ast> primary_expression
-//%type <ast> unary_expression
+%type <ast> unary_expression
 %type <ast> multiplicative_expression
 %type <ast> additive_expression
 %type <ast> arithmetic_expression
@@ -479,7 +479,6 @@ primary_expression:
 	}
 ;
 
-/*
 unary_expression:
 
 	'-' unary_expression 
@@ -492,32 +491,34 @@ unary_expression:
 	'(' FLOAT ')' unary_expression 
 	{
 		$$ = $4;
-		$$->set_data_type(float_data_type);
+		//$$->set_data_type(float_data_type);
 	}
 |
 	'(' INTEGER ')' unary_expression 
 	{
-		$4->set_data_type(int_data_type);
+		//$4->set_data_type(int_data_type);
 		$$ = $4;
 	}
 |
 	'(' DOUBLE ')' unary_expression 
 	{
 		$$ = $4;
-		$$->set_data_type(float_data_type);
+		//$$->set_data_type(float_data_type);
 	}
 |
 	primary_expression 
 	{
 		$$ = $1; 
-	} 
+	}
+;
+
+/* 
 |
 	function_call
 	{	
 		$$ = $1 ;
 	}
 ;
-
 */
 
 /*
@@ -538,21 +539,21 @@ function_call:
 ;
 */
 multiplicative_expression:
-	multiplicative_expression '*' primary_expression
+	multiplicative_expression '*' unary_expression
 	{
 		$$ = new Multiplication_Ast($1, $3);
 		int line = get_line_number();
 		 $$->check_ast();
 	}
 |
-	multiplicative_expression '/' primary_expression
+	multiplicative_expression '/' unary_expression
 	{
 		$$ = new Division_Ast($1, $3);
 		int line = get_line_number();
 		 $$->check_ast();
 	}
 |
-	primary_expression
+	unary_expression
 	{
 		$$ = $1;
 	}

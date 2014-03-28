@@ -92,6 +92,10 @@ typedef enum
 	sle,
 	sgt,
 	sge,
+	add,
+	sub,
+	mul,
+	divide,
 	nop 
 } Tgt_Op;
 
