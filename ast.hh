@@ -244,8 +244,8 @@ public:
 	
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 
-	Code_For_Ast & compile();
-	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+	virtual Code_For_Ast & compile();
+	virtual Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 
@@ -260,6 +260,9 @@ public:
 	void print(ostream & file_buffer);
 	
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 class Minus_Ast:public Arithmetic_Expr_Ast
@@ -274,6 +277,9 @@ public:
 	void print(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+
 };
 
 class Multiplication_Ast:public Arithmetic_Expr_Ast
@@ -285,7 +291,10 @@ public:
 	Data_Type get_data_type();
 	void print(ostream & file_buffer);
 	
-        Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+    Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+    Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 class Division_Ast:public Arithmetic_Expr_Ast
@@ -300,6 +309,9 @@ public:
 	void print(ostream & file_buffer);
 	
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 class Unary_Ast:public Arithmetic_Expr_Ast
@@ -314,6 +326,9 @@ public:
   
         bool check_ast();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 

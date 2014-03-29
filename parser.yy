@@ -29,6 +29,7 @@
 %union 
 {
 	int integer_value;
+	float float_value;
 	std::string * string_value;
 	pair<Data_Type, string> * decl;
 	list<Ast *> * ast_list;
@@ -269,6 +270,36 @@ declaration:
 		$$ = declar;
 	}
 	}
+|
+	FLOAT NAME
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		CHECK_INVARIANT(($2 != NULL), "Name cannot be null");
+
+		string name = *$2;
+		Data_Type type = int_data_type;
+
+		pair<Data_Type, string> * declar = new pair<Data_Type, string>(type, name);
+
+		$$ = declar;
+	}
+	}
+|
+	DOUBLE NAME
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		CHECK_INVARIANT(($2 != NULL), "Name cannot be null");
+
+		string name = *$2;
+		Data_Type type = int_data_type;
+
+		pair<Data_Type, string> * declar = new pair<Data_Type, string>(type, name);
+
+		$$ = declar;
+	}
+	}
 ;
 
 basic_block_list:
@@ -478,7 +509,7 @@ primary_expression:
 		$$ = $2; 
 	}
 ;
-
+	
 unary_expression:
 
 	'-' unary_expression 
@@ -529,7 +560,7 @@ function_call:
 		int line = get_line_number();	
 		$$->check_ast();		
 	}	
-|	
+	|	
 	NAME '(' ')'
 	{
 		$$ = new Call_Ast(program_object.get_procedure(*$1));

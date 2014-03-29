@@ -334,7 +334,11 @@ Eval_Result & Plus_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
     cout << "Data-Type not defined for addition\n";
   }
 }
-  
+
+Code_For_Ast & Plus_Ast::compile() {
+
+}
+Code_For_Ast & Plus_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
 /**********************************************************************************/
 
 Minus_Ast::Minus_Ast(Ast * l, Ast * r) {
@@ -390,6 +394,11 @@ Eval_Result & Minus_Ast::evaluate(Local_Environment & eval_env, ostream & file_b
     cout << "Data-Type not defined for addition\n";
   }
 }
+
+Code_For_Ast & Minus_Ast::compile() {
+
+}
+Code_For_Ast & Minus_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
 /**********************************************************************************/
 
 Multiplication_Ast::Multiplication_Ast(Ast * l, Ast * r) {
@@ -445,6 +454,11 @@ Eval_Result & Multiplication_Ast::evaluate(Local_Environment & eval_env, ostream
     cout << "Data-Type not defined for addition\n";
   }
 }
+
+Code_For_Ast & Multiplication_Ast::compile() {
+
+}
+Code_For_Ast & Multiplication_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
 /**********************************************************************************/
 
 Division_Ast::Division_Ast(Ast * l, Ast * r) {
@@ -512,6 +526,10 @@ Eval_Result & Division_Ast::evaluate(Local_Environment & eval_env, ostream & fil
     cout << "Data-Type not defined for addition\n";
   }
 }
+Code_For_Ast & Division_Ast::compile() {
+
+}
+Code_For_Ast & Division_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
 /**********************************************************************************/
 
 Unary_Ast::Unary_Ast(Ast * r) {
@@ -570,6 +588,11 @@ Eval_Result & Unary_Ast::evaluate(Local_Environment & eval_env, ostream & file_b
     cout << "Data-Type not defined for addition\n";
   }  
 }
+Code_For_Ast & Unary_Ast::compile() {
+
+}
+
+Code_For_Ast & Unary_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
 /***********************************************************************************/
 
 #if 0
