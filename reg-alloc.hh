@@ -45,6 +45,7 @@ typedef enum
 	t1, t2, t3, t4, t5, t6, t7, t8, t9, 
 	s0,	/* temporary callee-save registers */ 
 	s1, s2, s3, s4, s5, s6, s7,
+  f2, f4, f6, f8, f10,
 	gp,	/* global data pointer register */
 	sp,	/* stack pointer register */
 	fp,	/* frame pointer register */
@@ -53,7 +54,8 @@ typedef enum
 
 typedef enum 
 { 
-	int_num 
+	int_num,
+  float_num
 } Register_Val_Type;
 
 typedef enum 
@@ -88,6 +90,7 @@ public:
     void remove_symbol_entry_from_list(Symbol_Table_Entry & symbol_entry);
 
     Register_Use_Category get_use_category(); 
+    Register_Val_Type get_value_type(); 
     Spim_Register get_register();
 
   int associations();
@@ -246,7 +249,8 @@ public:
 	void validate_init_local_register_mapping();
 	void clear_local_register_mappings();
 
-	Register_Descriptor * get_new_register();
+  Register_Descriptor * get_new_register();
+	Register_Descriptor * get_new_float_register();
 	Register_Descriptor * get_zero_register();
 };
 

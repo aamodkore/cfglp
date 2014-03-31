@@ -34,9 +34,9 @@ class Symbol_Table_Entry;
 
 typedef enum
 {
-	void_data_type,
-	int_data_type,
-	float_data_type
+	void_data_type = 0,
+	int_data_type = 1,
+	float_data_type = 2
 } Data_Type;
 
 typedef enum

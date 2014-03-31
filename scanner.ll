@@ -76,7 +76,7 @@ goto		{
 				ParserBase::STYPE__ * val = getSval();
 				val->float_value = atof(matched().c_str());
 
-				return Parser::INTEGER_NUMBER; 
+				return Parser::FLOAT_NUMBER; 
 			}
 
 [[:alpha:]_][[:alpha:][:digit:]_]* {

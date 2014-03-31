@@ -45,6 +45,11 @@ Ast::Ast()
 Ast::~Ast()
 {}
 
+
+void Ast::set_data_type(Data_Type dt) {
+	node_data_type = dt;
+}
+
 bool Ast::check_ast()
 {
 	stringstream msg;
@@ -124,6 +129,12 @@ bool Assignment_Ast::check_ast()
 		return true;
 	}
 
+	else {
+		lhs->print(cout) ;
+		cout << "\nLHS: " << lhs->get_data_type() <<
+			"\t, RHS: " << rhs->get_data_type() << endl ;
+		rhs->print(cout) ; cout << endl ;
+	}
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 		"Assignment statement data type not compatible");
 }
@@ -340,11 +351,23 @@ Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 Code_For_Ast & Name_Ast::compile()
 {
 	Ics_Opd * opd = new Mem_Addr_Opd(*variable_symbol_entry);
-	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
+	Register_Descriptor * result_register = NULL;
+	Tgt_Op opr ;
+	if (node_data_type == int_data_type) {
+		result_register = machine_dscr_object.get_new_register();
+		opr = load ;
+	}
+	else if (node_data_type == float_data_type) {
+		result_register = machine_dscr_object.get_new_float_register();
+		opr = load_d ;
+	}
+	else
+		CHECK_INVARIANT((result_register != NULL), "Invalid data type");
+
 	result_register->update_symbol_information(*variable_symbol_entry);
 	Ics_Opd * register_opd = new Register_Addr_Opd(result_register);
 	
-	Icode_Stmt * load_stmt = new Move_IC_Stmt(load, opd, register_opd);
+	Icode_Stmt * load_stmt = new Move_IC_Stmt(opr, opd, register_opd);
 	
 	list<Icode_Stmt *> ic_list;
 	ic_list.push_back(load_stmt);
@@ -361,7 +384,13 @@ Code_For_Ast & Name_Ast::create_store_stmt(Register_Descriptor * store_register)
 	Ics_Opd * register_opd = new Register_Addr_Opd(store_register);
 	Ics_Opd * opd = new Mem_Addr_Opd(*variable_symbol_entry);
 
-	Icode_Stmt * store_stmt = new Move_IC_Stmt(store, register_opd, opd);
+	Icode_Stmt * store_stmt = NULL ;
+	if (store_register->get_value_type() == int_num)
+		store_stmt = new Move_IC_Stmt(store, register_opd, opd);
+	else if (store_register->get_value_type() == float_num)
+		store_stmt = new Move_IC_Stmt(store_d, register_opd, opd);
+	else
+		CHECK_INVARIANT((store_stmt != NULL), "Invalid store type");
 
 	if (command_options.is_do_lra_selected() == false) 
 	  {
@@ -453,14 +482,24 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 template <class DATA_TYPE>
 Code_For_Ast & Number_Ast<DATA_TYPE>::compile()
 {
-	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
+	Register_Descriptor * result_register ;
+	Tgt_Op opr ;
+	if (node_data_type == int_data_type) {
+		result_register = machine_dscr_object.get_new_register();
+		opr = imm_load ;
+	}
+	else if (node_data_type == float_data_type) {
+		result_register = machine_dscr_object.get_new_float_register();
+		opr = imm_load_d ;
+	}
+	
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	
 	result_register->set_used_for_expr_result();
 	Ics_Opd * load_register = new Register_Addr_Opd(result_register);
-	Ics_Opd * opd = new Const_Opd<int>(constant);
+	Ics_Opd * opd = new Const_Opd<DATA_TYPE>(node_data_type, constant);
 
-	Icode_Stmt * load_stmt = new Move_IC_Stmt(imm_load, opd, load_register);
+	Icode_Stmt * load_stmt = new Move_IC_Stmt(opr, opd, load_register);
 
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
 	ic_list.push_back(load_stmt);
@@ -527,6 +566,7 @@ Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 }
 
 template class Number_Ast<int>;
+template class Number_Ast<float>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 

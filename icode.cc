@@ -142,6 +142,15 @@ template <class DATA_TYPE>
 Const_Opd<DATA_TYPE>::Const_Opd(DATA_TYPE n) 
 {
 	type = constant_addr;
+	constant_type = int_data_type ;
+	num = n;
+}
+
+template <class DATA_TYPE>
+Const_Opd<DATA_TYPE>::Const_Opd(Data_Type dt, DATA_TYPE n) 
+{
+	type = constant_addr;
+	constant_type = dt ;
 	num = n;
 }
 
@@ -157,13 +166,21 @@ Const_Opd<DATA_TYPE> & Const_Opd<DATA_TYPE>::operator=(const Const_Opd<DATA_TYPE
 template <class DATA_TYPE>
 void Const_Opd<DATA_TYPE>::print_ics_opd(ostream & file_buffer) 
 {
-	file_buffer << num;
+	if (constant_type == float_data_type) {
+		file_buffer << std::fixed << setprecision(2) << num;
+	} else {
+		file_buffer << num ;
+	}
 }
 
 template <class DATA_TYPE>
 void Const_Opd<DATA_TYPE>::print_asm_opd(ostream & file_buffer) 
 {
-	file_buffer << num;
+	if (constant_type == float_data_type) {
+		file_buffer << std::fixed << setprecision(2) << num;
+	} else {
+		file_buffer << num ;
+	}
 }
 
 /****************************** Class Icode_Stmt *****************************/
@@ -242,7 +259,13 @@ void Move_IC_Stmt::print_icode(ostream & file_buffer)
 	switch (ic_format)
 	{
 	case i_r_op_o1: 
-			file_buffer << " " << operation_name << ":\t";
+			file_buffer << "\t" << operation_name ;
+			if (operation_name.size()<7) 
+				file_buffer << ":\t\t";
+			else if (operation_name.size()<15)
+				file_buffer << ":\t";
+			else
+				file_buffer << ":";
 			result->print_ics_opd(file_buffer);
 			file_buffer << " <- ";
 			opd1->print_ics_opd(file_buffer);
@@ -371,11 +394,17 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer) {
 	switch (ic_format)
 	{
 	case i_op_o1: 
-		file_buffer << " " <<  op_name << " label" << label_no ;
+		file_buffer << "\t" <<  op_name << " label" << label_no ;
 		file_buffer << "\n";
 		break; 
 	case i_branch:
-		file_buffer << " " << op_name << ": ";
+		file_buffer << "\t" << op_name ;
+		if (op_name.size()<7) 
+			file_buffer << ":\t\t";
+		else if (op_name.size()<15)
+			file_buffer << ":\t";
+		else
+			file_buffer << ":";
 		l_opd->print_ics_opd(file_buffer);
 		file_buffer << " , ";
 		r_opd->print_ics_opd(file_buffer);
@@ -439,7 +468,13 @@ void Compute_IC_Stmt::print_icode(ostream & file_buffer) {
 	switch (ic_format)
 	{
 	case i_r_o1_op_o2: 
-			file_buffer << " " << operation_name << ": ";
+			file_buffer << "\t" << operation_name ;
+			if (operation_name.size()<7) 
+				file_buffer << ":\t\t";
+			else if (operation_name.size()<15)
+				file_buffer << ":\t";
+			else
+				file_buffer << ":";
 			result->print_ics_opd(file_buffer);
 			file_buffer << " <- ";
 			l_opd->print_ics_opd(file_buffer);
@@ -471,6 +506,77 @@ void Compute_IC_Stmt::print_assembly(ostream & file_buffer) {
 			l_opd->print_asm_opd(file_buffer);
 			file_buffer << ", " ;
 			r_opd->print_asm_opd(file_buffer);
+			file_buffer << "\n";
+			break; 
+
+	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+				"Intermediate code format not supported");
+		break;
+	}
+}
+
+
+/******************************Class Unary_IC_Stmt ***************************/
+Unary_IC_Stmt::Unary_IC_Stmt() 
+{}
+
+Unary_IC_Stmt::Unary_IC_Stmt(Tgt_Op op, Ics_Opd * res,  Ics_Opd * rhs) {
+	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),
+			"Instruction description in spim table cannot be null");
+	
+	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
+	result = res;
+	opd = rhs;
+}
+Unary_IC_Stmt::~Unary_IC_Stmt() 
+{}
+
+Instruction_Descriptor & Unary_IC_Stmt::get_inst_op_of_ics() {}
+
+void Unary_IC_Stmt::print_icode(ostream & file_buffer) {
+	CHECK_INVARIANT (opd, "Right Opd cannot be NULL for a Compute IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a Compute IC Stmt");
+
+	string operation_name = op_desc.get_name();
+
+	Icode_Format ic_format = op_desc.get_ic_format();
+
+	switch (ic_format)
+	{
+	case i_r_op_o1: 
+			file_buffer << "\t" << operation_name ;
+			if (operation_name.size()<7) 
+				file_buffer << ":\t\t";
+			else if (operation_name.size()<15)
+				file_buffer << ":\t";
+			else
+				file_buffer << ":";
+			result->print_ics_opd(file_buffer);
+			file_buffer << " <- ";
+			opd->print_ics_opd(file_buffer);
+			file_buffer << "\n";
+			break; 
+
+	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+				"Intermediate code format not supported");
+		break;
+	}
+}
+void Unary_IC_Stmt::print_assembly(ostream & file_buffer) {
+	CHECK_INVARIANT (opd, "Right Opd cannot be NULL for a Compute IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a Compute IC Stmt");
+
+	string operation_name = op_desc.get_mnemonic();
+
+	Assembly_Format asm_format = op_desc.get_assembly_format();
+
+	switch (asm_format)
+	{
+	case a_op_r_o1: 
+			file_buffer << "\t" << operation_name << " ";
+			result->print_asm_opd(file_buffer);
+			file_buffer << ", ";
+			opd->print_asm_opd(file_buffer);
 			file_buffer << "\n";
 			break; 
 
@@ -550,3 +656,4 @@ Instruction_Descriptor::Instruction_Descriptor()
 }
 
 template class Const_Opd<int>;
+template class Const_Opd<float>;

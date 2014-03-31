@@ -65,6 +65,7 @@ public:
 	Ast();
 	~Ast();
 
+	void set_data_type(Data_Type dt) ;
 	virtual Data_Type get_data_type();
 	virtual bool check_ast();
 	virtual Symbol_Table_Entry & get_symbol_entry();
@@ -325,6 +326,24 @@ public:
 	void print(ostream & file_buffer);
   
         bool check_ast();
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+
+class Type_Cast_Ast:public Arithmetic_Expr_Ast
+{
+public:
+	Type_Cast_Ast(Ast * r, Data_Type dt) ;
+	~Type_Cast_Ast() ;
+
+   Data_Type get_data_type();
+	
+	void print(ostream & file_buffer);
+  
+    bool check_ast();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
 	Code_For_Ast & compile();

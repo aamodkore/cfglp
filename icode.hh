@@ -62,7 +62,7 @@ typedef enum
 	i_r_op,		/* Only the result. Operand implicit? */ 
 	i_op_o1_r,    
 	i_op_r_o1,    
-	i_r_op_o1,	/* r <- o1 */
+	i_r_op_o1,		/* r <- o1 */
 	i_r_r_op_o1,	/* r <- r op o1 */
 	i_r_o1_op_o2,	/* r <- o1 op o2 */
 	i_label,        /* Label x: */
@@ -83,6 +83,9 @@ typedef enum
 	load, 
 	imm_load, 
 	store, 
+	load_d, 
+	imm_load_d, 
+	store_d, 
 	label,
 	jump,
 	bne,
@@ -96,7 +99,15 @@ typedef enum
 	sub,
 	mul,
 	divide,
-	nop 
+	neg,
+	add_d,
+	sub_d,
+	mul_d,
+	divide_d,
+	neg_d,
+	cast_int,
+	cast_float,
+	nop
 } Tgt_Op;
 
 ///////////////////////// Instruction Descriptor ///////////////////////////////////
@@ -186,9 +197,11 @@ template <class T>
 class Const_Opd: public Ics_Opd
 {
 	T num;
+	Data_Type constant_type ;
 
 public:
 	Const_Opd (T num);
+	Const_Opd (Data_Type dt, T num);
 	~Const_Opd() {}
 
 	void print_ics_opd(ostream & file_buffer);
@@ -291,6 +304,21 @@ class Compute_IC_Stmt: public Icode_Stmt {
 	Compute_IC_Stmt();
 	Compute_IC_Stmt(Tgt_Op op, Ics_Opd * res, Ics_Opd * lhs, Ics_Opd * rhs);
 	~Compute_IC_Stmt();
+
+	Instruction_Descriptor & get_inst_op_of_ics();
+
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+class Unary_IC_Stmt: public Icode_Stmt {
+	Ics_Opd * result;
+	Ics_Opd * opd;
+
+ public:
+	Unary_IC_Stmt();
+	Unary_IC_Stmt(Tgt_Op op, Ics_Opd * res, Ics_Opd *);
+	~Unary_IC_Stmt();
 
 	Instruction_Descriptor & get_inst_op_of_ics();
 

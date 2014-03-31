@@ -43,6 +43,7 @@
 };
 
 %token <integer_value> INTEGER_NUMBER BBNUM
+%token <float_value> FLOAT_NUMBER
 %token <string_value> NAME
 %token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO
 %token ASSIGN NE EQ LT LE GT GE
@@ -278,7 +279,7 @@ declaration:
 		CHECK_INVARIANT(($2 != NULL), "Name cannot be null");
 
 		string name = *$2;
-		Data_Type type = int_data_type;
+		Data_Type type = float_data_type;
 
 		pair<Data_Type, string> * declar = new pair<Data_Type, string>(type, name);
 
@@ -521,21 +522,22 @@ unary_expression:
 |
 	'(' FLOAT ')' unary_expression 
 	{
-		$$ = $4;
-		//$$->set_data_type(float_data_type);
+		$$ = new Type_Cast_Ast($4, float_data_type);
+		int line = get_line_number();
+		$$->check_ast();
 	}
 |
 	'(' INTEGER ')' unary_expression 
 	{
-		//$4->set_data_type(int_data_type);
-		$$ = $4;
-	}
+		$$ = new Type_Cast_Ast($4, int_data_type);
+		int line = get_line_number();
+		$$->check_ast();	}
 |
 	'(' DOUBLE ')' unary_expression 
 	{
-		$$ = $4;
-		//$$->set_data_type(float_data_type);
-	}
+		$$ = new Type_Cast_Ast($4, float_data_type);
+		int line = get_line_number();
+		$$->check_ast();	}
 |
 	primary_expression 
 	{
@@ -709,6 +711,18 @@ constant:
 		int num = $1;
 
 		Ast * num_ast = new Number_Ast<int>(num, int_data_type, get_line_number());
+
+		$$ = num_ast;
+	}
+	}
+|
+	FLOAT_NUMBER
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		float num = $1;
+
+		Ast * num_ast = new Number_Ast<float>(num, float_data_type, get_line_number());
 
 		$$ = num_ast;
 	}
