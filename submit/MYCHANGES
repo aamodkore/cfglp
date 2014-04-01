@@ -1,22 +1,24 @@
-*******************************************************************************
+*****************************************************************************************
 
-CS 306 - Assignment 5a
+CS 306 - Assignment 6a
 
 	S S Kausik	110050003
 	Aamod Kore	110050004
 
-*******************************************************************************
+*****************************************************************************************
 
-Changes done after Level0 :
+Changes done after Level1 Compiler :
 
-1. Added grammar rules for relational expressions and control flow statements
+1. Added grammar rules for arithmetic expressions and float declararions and data types
 
-2. Created classes for Intermediate Code: Label, Control Flow and Compute 
-   Statements.   
+2. Created classes for Intermediate Code: Unary Compute statements for unary minus
+   and type castings.   
 
-3. Added syntatic and semantic check(basic-block validity).
+3. Added syntatic and semantic check (for arithmetic expressions and data-type
+   compatibility).
 
-4. Wrote code for generating intermediate code for relational expressions and
-   control flow statements. 
+4. Wrote code for generating intermediate code for arithmetic expressions and data-type
+   casting and modified the code for Name and Number expression ASTs to incorporate
+   float and double data types.
 
-************************************************************************
+*****************************************************************************************
