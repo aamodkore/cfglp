@@ -129,12 +129,6 @@ bool Assignment_Ast::check_ast()
 		return true;
 	}
 
-	else {
-		lhs->print(cout) ;
-		cout << "\nLHS: " << lhs->get_data_type() <<
-			"\t, RHS: " << rhs->get_data_type() << endl ;
-		rhs->print(cout) ; cout << endl ;
-	}
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 		"Assignment statement data type not compatible");
 }
