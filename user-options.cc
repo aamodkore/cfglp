@@ -225,7 +225,7 @@ string User_Options::process_user_command_options(int argc, char * argv[])
 			-icode	  Compile the program and show the intermediate code in file.ic (or out.ic)\n\
 				  (-eval and -icode options are mutually exclusive\n\
 			-d        Demo version. Use stdout for the outputs instead of files\n\n";
-
+	not_only_parse = true ;
 	for (int i = 1; i < argc; i++)
 	{    
 		char * option = strdup(argv[i]);
@@ -234,8 +234,8 @@ string User_Options::process_user_command_options(int argc, char * argv[])
 			if (!strcmp(option,"-d"))
 				demo_mode_selected = true;
 
-			else if (!strcmp(option, "-parse"))
-				not_only_parse = false;
+			// else if (!strcmp(option, "-parse"))
+			// 	not_only_parse = false;
 
 			else if (!strcmp(option, "-tokens"))
 			{ 

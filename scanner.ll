@@ -71,7 +71,7 @@ goto		{
 			}
 
 [-]?[[:digit:]]+[.][[:digit:]]+	{ 
-				store_token_name("FLOAT");
+				store_token_name("FNUM");
 
 				ParserBase::STYPE__ * val = getSval();
 				val->float_value = atof(matched().c_str());
@@ -131,7 +131,7 @@ goto		{
 			}
 
 [-+*/] 		{
-				store_token_name("ARITH_OP");
+				store_token_name("ARITHOP");
 				return matched()[0];
 			}
 
