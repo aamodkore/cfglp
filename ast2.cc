@@ -56,11 +56,9 @@ bool Relational_Expr_Ast::check_ast() {
       node_data_type = int_data_type;
       return true;
     }
+  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Relational statement data type not compatible", lineno);
 
-  cout << "Relational statement data type not compatible";
 }
-
-
 
 void Relational_Expr_Ast::print(ostream & file_buffer) {
 
@@ -269,7 +267,7 @@ bool Arithmetic_Expr_Ast::check_ast() {
       node_data_type = lhs->get_data_type();
       return true;
     }
-  cout << "Arithmetic statement data type not compatible";
+  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Arithmetic statement data type not compatible", lineno);
 }
 
 Data_Type Arithmetic_Expr_Ast::get_data_type() {
@@ -896,7 +894,7 @@ bool Unary_Ast::check_ast() {
     node_data_type = rhs->get_data_type();
     return true;
   }
-  cout << "Unary expression data type not compatible";
+  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Unary expression statement data type not compatible", lineno);
 }
 
 
@@ -1028,7 +1026,7 @@ bool Type_Cast_Ast::check_ast() {
     //node_data_type = rhs->get_data_type();
     return true;
   }
-  cout << "Unary expression data type not compatible";
+  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Type cast data type not compatible", lineno);
 }
 
 

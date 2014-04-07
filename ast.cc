@@ -129,8 +129,7 @@ bool Assignment_Ast::check_ast()
 		return true;
 	}
 
-	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
-		"Assignment statement data type not compatible");
+	report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Assignment statement data type not compatible", lineno);
 }
 
 void Assignment_Ast::print(ostream & file_buffer)

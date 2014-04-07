@@ -1,24 +1,19 @@
 *****************************************************************************************
 
-CS 306 - Assignment 6a
+CS 306 - Assignment 6b
 
 	S S Kausik	110050003
 	Aamod Kore	110050004
 
 *****************************************************************************************
 
-Changes done after Level1 Compiler :
+Changes done after Level2 Intermidiate Code Generation :
 
-1. Added grammar rules for arithmetic expressions and float declararions and data types
+1. Added symbol table entries and offsets for float type registers.
 
-2. Created classes for Intermediate Code: Unary Compute statements for unary minus
-   and type castings.   
+2. Added code for compile_and_optimize functions in Arithmetic Expression ASTs.
 
-3. Added syntatic and semantic check (for arithmetic expressions and data-type
-   compatibility).
-
-4. Wrote code for generating intermediate code for arithmetic expressions and data-type
-   casting and modified the code for Name and Number expression ASTs to incorporate
-   float and double data types.
+3. Modified code of compile_and_optimize in Assignment, Name and Float ASTs as well as
+   optimize_lra of Lra_Outcome to incorporate float data types.
 
 *****************************************************************************************

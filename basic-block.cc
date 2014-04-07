@@ -108,7 +108,7 @@ list<Icode_Stmt *> & Basic_Block::compile()
 			    ast_code = ast->compile_and_optimize_ast(lra);
 			}
 
-			else if (command_options.is_do_compile_selected() == true)
+			else if (command_options.is_do_compile_selected() || command_options.is_show_ic_selected())
 				ast_code = ast->compile();
 
 			else
