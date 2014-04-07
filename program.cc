@@ -185,7 +185,8 @@ void Program::compile()
 		}
 	}
 	// print assembly language
-	print_assembly();
+	if (command_options.is_do_compile_selected())
+		print_assembly();
 }
 
 void Program::print_assembly()

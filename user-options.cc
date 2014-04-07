@@ -320,7 +320,7 @@ string User_Options::process_user_command_options(int argc, char * argv[])
 		}
 	}
 
-	do_compile_selected = (do_eval_selected)? false:true;
+	do_compile_selected = (do_eval_selected)? false:do_compile_selected;
 
 	if (user_input_file_entered == true)
 	{

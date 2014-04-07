@@ -382,7 +382,50 @@ Code_For_Ast & Plus_Ast::compile() {
 }
 
 
-Code_For_Ast & Plus_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Plus_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((lhs != NULL), "LHS cannot be null");
+  CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+  
+  Register_Descriptor * result_reg = NULL;
+  
+  lra.optimize_lra(mc_2r, NULL, lhs);
+  Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * lreg = lhs_stmt.get_reg();
+
+  lra.optimize_lra(mc_2r, NULL, rhs);
+  Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  Ics_Opd * lhs_reg = new Register_Addr_Opd(lreg);
+  Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+  
+  if (lhs_stmt.get_icode_list().empty() == false)
+    ic_list = lhs_stmt.get_icode_list();
+  if (rhs_stmt.get_icode_list().empty() == false)
+    ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+  
+  Tgt_Op opr ;
+  if (lreg->get_value_type() == int_num) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_register();
+    opr = add ;
+  }
+  if (lreg->get_value_type() == float_num) {
+    if(!result_reg) result_reg = machine_dscr_object.get_new_float_register();
+    opr = add_d ;
+  }
+  result_reg->set_used_for_expr_result();
+  Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+  ic_list.push_back(new Compute_IC_Stmt(opr, register_result, lhs_reg, rhs_reg)) ;
+  
+  // Free the previous result register.
+  lreg->reset_use_for_expr_result();
+  rreg->reset_use_for_expr_result();
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+}
 
 
 /**********************************************************************************/
@@ -488,7 +531,52 @@ Code_For_Ast & Minus_Ast::compile() {
 }
 
 
-Code_For_Ast & Minus_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Minus_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((lhs != NULL), "LHS cannot be null");
+  CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+  
+  Register_Descriptor * result_reg = NULL;
+  
+  
+  lra.optimize_lra(mc_2r, NULL, lhs);
+  Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * lreg = lhs_stmt.get_reg();
+
+  lra.optimize_lra(mc_2r, NULL, rhs);
+  Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  Ics_Opd * lhs_reg = new Register_Addr_Opd(lreg);
+  Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+  
+  if (lhs_stmt.get_icode_list().empty() == false)
+    ic_list = lhs_stmt.get_icode_list();
+  if (rhs_stmt.get_icode_list().empty() == false)
+    ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+  
+  Tgt_Op opr ;
+  if (lreg->get_value_type() == int_num) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_register();
+    opr = sub ;
+  }
+  if (lreg->get_value_type() == float_num) {
+    if(!result_reg) result_reg = machine_dscr_object.get_new_float_register();
+    opr = sub_d ;
+  }
+  result_reg->set_used_for_expr_result();
+  Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+  ic_list.push_back(new Compute_IC_Stmt(opr, register_result, lhs_reg, rhs_reg)) ;
+  
+  // Free the previous result register.
+  lreg->reset_use_for_expr_result();
+  rreg->reset_use_for_expr_result();
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+
+}
 /**********************************************************************************/
 
 Multiplication_Ast::Multiplication_Ast(Ast * l, Ast * r) {
@@ -592,7 +680,51 @@ Code_For_Ast & Multiplication_Ast::compile() {
 }
 
 
-Code_For_Ast & Multiplication_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Multiplication_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((lhs != NULL), "LHS cannot be null");
+  CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+  
+  Register_Descriptor * result_reg = NULL;
+  
+  lra.optimize_lra(mc_2r, NULL, lhs);
+  Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * lreg = lhs_stmt.get_reg();
+
+  lra.optimize_lra(mc_2r, NULL, rhs);
+  Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  Ics_Opd * lhs_reg = new Register_Addr_Opd(lreg);
+  Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+  
+  if (lhs_stmt.get_icode_list().empty() == false)
+    ic_list = lhs_stmt.get_icode_list();
+  if (rhs_stmt.get_icode_list().empty() == false)
+    ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+  
+  Tgt_Op opr ;
+  if (lreg->get_value_type() == int_num) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_register();
+    opr = mul ;
+  }
+  if (lreg->get_value_type() == float_num) {
+    if(!result_reg) result_reg = machine_dscr_object.get_new_float_register();
+    opr = mul_d ;
+  }
+  result_reg->set_used_for_expr_result();
+  Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+  ic_list.push_back(new Compute_IC_Stmt(opr, register_result, lhs_reg, rhs_reg)) ;
+  
+  // Free the previous result register.
+  lreg->reset_use_for_expr_result();
+  rreg->reset_use_for_expr_result();
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+
+}
 /**********************************************************************************/
 
 Division_Ast::Division_Ast(Ast * l, Ast * r) {
@@ -705,7 +837,51 @@ Code_For_Ast & Division_Ast::compile() {
   Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
   return rel_expr_code;
 }
-Code_For_Ast & Division_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Division_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((lhs != NULL), "LHS cannot be null");
+  CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+  
+  Register_Descriptor * result_reg = NULL;
+  
+  lra.optimize_lra(mc_2r, NULL, lhs);
+  Code_For_Ast & lhs_stmt = lhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * lreg = lhs_stmt.get_reg();
+
+  lra.optimize_lra(mc_2r, NULL, rhs);
+  Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  Ics_Opd * lhs_reg = new Register_Addr_Opd(lreg);
+  Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+  
+  if (lhs_stmt.get_icode_list().empty() == false)
+    ic_list = lhs_stmt.get_icode_list();
+  if (rhs_stmt.get_icode_list().empty() == false)
+    ic_list.splice(ic_list.end(), rhs_stmt.get_icode_list());
+  
+  Tgt_Op opr ;
+  if (lreg->get_value_type() == int_num) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_register();
+    opr = divide ;
+  }
+  if (lreg->get_value_type() == float_num) {
+    if(!result_reg) result_reg = machine_dscr_object.get_new_float_register();
+    opr = divide_d ;
+  }
+  result_reg->set_used_for_expr_result();
+  Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+  ic_list.push_back(new Compute_IC_Stmt(opr, register_result, lhs_reg, rhs_reg)) ;
+  
+  // Free the previous result register.
+  lreg->reset_use_for_expr_result();
+  rreg->reset_use_for_expr_result();
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+
+}
 /**********************************************************************************/
 
 Unary_Ast::Unary_Ast(Ast * r) {
@@ -799,7 +975,42 @@ Code_For_Ast & Unary_Ast::compile() {
   return rel_expr_code;
 }
 
-Code_For_Ast & Unary_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Unary_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+  
+  Register_Descriptor * result_reg = NULL;
+  
+  lra.optimize_lra(mc_2r, NULL, rhs);
+  Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+  
+  if (rhs_stmt.get_icode_list().empty() == false)
+    ic_list = rhs_stmt.get_icode_list();
+  
+  Tgt_Op opr ;
+  if (rreg->get_value_type() == int_num) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_register();
+    opr = neg ;
+  }
+  if (rreg->get_value_type() == float_num) {
+    if(!result_reg) result_reg = machine_dscr_object.get_new_float_register();
+    opr = neg_d ;
+  }
+  result_reg->set_used_for_expr_result();
+  Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+  ic_list.push_back(new Unary_IC_Stmt(opr, register_result, rhs_reg)) ;
+  
+  // Free the previous result register.
+  rreg->reset_use_for_expr_result();
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+
+}
 /***********************************************************************************/
 
 /**********************************************************************************/
@@ -905,7 +1116,51 @@ Code_For_Ast & Type_Cast_Ast::compile() {
   }
 }
 
-Code_For_Ast & Type_Cast_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Type_Cast_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((rhs != NULL), "RHS cannot be null");
+  
+  Register_Descriptor * result_reg = NULL;
+  
+  lra.optimize_lra(mc_2r, NULL, rhs);
+  Code_For_Ast & rhs_stmt = rhs->compile_and_optimize_ast(lra);
+  Register_Descriptor * rreg = rhs_stmt.get_reg();
+
+  if ((rreg->get_value_type() == int_num && node_data_type==int_data_type) ||
+      (rreg->get_value_type() == float_num && node_data_type==float_data_type) )
+  {
+    return rhs_stmt ;
+  }
+
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;;
+
+  Ics_Opd * rhs_reg = new Register_Addr_Opd(rreg);
+  
+  if (rhs_stmt.get_icode_list().empty() == false)
+    ic_list = rhs_stmt.get_icode_list();
+  
+  Tgt_Op opr ;
+  if (rreg->get_value_type() == int_num && node_data_type==float_data_type) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_float_register();
+    opr = cast_float ;
+  }
+  else if (rreg->get_value_type() == float_num && node_data_type==int_data_type) {
+    if (!result_reg) result_reg = machine_dscr_object.get_new_register();
+    opr = cast_int ;
+  }
+  else {
+    CHECK_INVARIANT(false, "Invalid cast") ;
+  }
+  result_reg->set_used_for_expr_result();
+  Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+  ic_list.push_back(new Unary_IC_Stmt(opr, register_result, rhs_reg)) ;
+  
+  // Free the previous result register.
+  rreg->reset_use_for_expr_result();
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+
+}
 /***********************************************************************************/
 
 #if 0

@@ -418,8 +418,11 @@ Code_For_Ast & Name_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	if (load_needed)
 	{
 		Ics_Opd * opd = new Mem_Addr_Opd(*variable_symbol_entry);
-
-		load_stmt = new Move_IC_Stmt(load, opd, register_opd);
+		Tgt_Op opr ;
+		if (node_data_type == int_data_type) opr = load ;
+		else if (node_data_type == float_data_type) opr = load_d ;
+		else CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Data Type.")
+		load_stmt = new Move_IC_Stmt(opr, opd, register_opd);
 			
 		ic_list.push_back(load_stmt);
 	}
@@ -510,9 +513,14 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile_and_optimize_ast(Lra_Outcome & lra
 	lra.get_register()->set_used_for_expr_result();
 
 	Ics_Opd * load_register = new Register_Addr_Opd(lra.get_register());
-	Ics_Opd * opd = new Const_Opd<int>(constant);
+	Ics_Opd * opd = new Const_Opd<DATA_TYPE>(node_data_type, constant);
 
-	Icode_Stmt * load_stmt = new Move_IC_Stmt(imm_load, opd, load_register);
+	Tgt_Op opr ;
+	if (node_data_type == int_data_type) 
+		opr = imm_load ;
+	else if (node_data_type == float_data_type) 
+		opr = imm_load_d ;
+	Icode_Stmt * load_stmt = new Move_IC_Stmt(opr, opd, load_register);
 	
 	list<Icode_Stmt *> ic_list;
 	ic_list.push_back(load_stmt);

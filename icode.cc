@@ -179,7 +179,7 @@ void Const_Opd<DATA_TYPE>::print_asm_opd(ostream & file_buffer)
 	if (constant_type == float_data_type) {
 		file_buffer << std::fixed << setprecision(2) << num;
 	} else {
-		file_buffer << num ;
+		file_buffer << num;
 	}
 }
 

@@ -198,9 +198,18 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		}
 		else 
 		{
-		  if(typeid(*source_memory) == typeid(Relational_Expr_Ast)) return;
+		  	if(typeid(*source_memory) == typeid(Relational_Expr_Ast) ||
+		  		typeid(*source_memory) == typeid(Plus_Ast) ||
+		  		typeid(*source_memory) == typeid(Minus_Ast) ||
+		  		typeid(*source_memory) == typeid(Multiplication_Ast) ||
+		  		typeid(*source_memory) == typeid(Division_Ast) ||
+		  		typeid(*source_memory) == typeid(Unary_Ast) ||
+		  		typeid(*source_memory) == typeid(Type_Cast_Ast)) return;
 			// cout << "in mc2m\n";
-			result_register = machine_dscr_object.get_new_register();
+			if (source_memory->get_data_type() == float_data_type)
+				result_register = machine_dscr_object.get_new_float_register();
+			else
+				result_register = machine_dscr_object.get_new_register();
 			// cout << result_register->get_name() << endl;
 			is_a_new_register = true;
 			load_needed = true;
@@ -223,7 +232,10 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		   else 
 		   {
 				// cout << "In mc2r name\n";
-			   result_register = machine_dscr_object.get_new_register();
+			   if (source_memory->get_data_type() == float_data_type)
+			   	result_register = machine_dscr_object.get_new_float_register();
+			   else
+			   	result_register = machine_dscr_object.get_new_register();
 			   result_register->set_used_for_expr_result();
 			   is_a_new_register = true;
 			   load_needed = true;
@@ -232,7 +244,10 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		else 
 		{
 			// cout << "In mc2r non reg\n";
-			result_register = machine_dscr_object.get_new_register();
+			if (source_memory->get_data_type() == float_data_type)
+				result_register = machine_dscr_object.get_new_float_register();
+			else
+				result_register = machine_dscr_object.get_new_register();
 			// result_register->set_used_for_expr_result();
 			is_a_new_register = true;
 			load_needed = true;
@@ -304,6 +319,9 @@ void Machine_Description::initialize_register_table()
 	spim_register_table[f6] = new Register_Descriptor(f6, "f6", float_num, gp_data);
 	spim_register_table[f8] = new Register_Descriptor(f8, "f8", float_num, gp_data);
 	spim_register_table[f10] = new Register_Descriptor(f10, "f10", float_num, gp_data);
+	spim_register_table[f12] = new Register_Descriptor(f12, "f12", float_num, gp_data);
+	spim_register_table[f14] = new Register_Descriptor(f14, "f14", float_num, gp_data);
+	spim_register_table[f16] = new Register_Descriptor(f16, "f16", float_num, gp_data);
 	spim_register_table[gp] = new Register_Descriptor(gp, "gp", int_num, pointer);
 	spim_register_table[sp] = new Register_Descriptor(sp, "sp", int_num, pointer);
 	spim_register_table[fp] = new Register_Descriptor(fp, "fp", int_num, pointer);

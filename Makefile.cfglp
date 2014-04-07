@@ -59,6 +59,7 @@ parser.cc parserbase.h: parser.yy parser.ih parser.h
 clean :
 	rm -f *.o scannerbase.h parserbase.h scanner.cc parser.cc parser.yy.output
 	rm -f cscope.out tags a.out *.tgz $(TGT)
+	rm -f cfg/*.spim cfg/*.out cfg/*.ic cfg/*.toks cfg/*.sym cfg/*.eval cfg/*.ast
 
 submit : clean
 	mkdir -p $(SUBMIT_DIR)
