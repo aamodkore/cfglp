@@ -351,7 +351,7 @@ public:
 };
 
 
-/*
+
 class Call_Ast:public Ast
 {
 	Procedure * fn;
@@ -367,7 +367,10 @@ public:
 	Data_Type get_data_type();
 	bool check_ast(int line);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
-*/
+
 
 #endif

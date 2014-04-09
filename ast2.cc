@@ -1161,20 +1161,19 @@ Code_For_Ast & Type_Cast_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
 }
 /***********************************************************************************/
 
-#if 0
 Call_Ast::Call_Ast() {
 }
 
 Call_Ast::Call_Ast(Procedure * f, list<Ast *> args) {
   fn = f;
   arguments = args;
-  node_data_type = void_data_type;
+  node_data_type = f->get_return_type();
 }
 
 Call_Ast::Call_Ast(Procedure * f) {
   fn = f;
   arguments =  *(new list<Ast *>());  
-  node_data_type = void_data_type;
+  node_data_type = f->get_return_type();
 }
 
 
@@ -1197,57 +1196,17 @@ void Call_Ast::print(ostream & file_buffer) {
 
 bool Call_Ast::check_ast(int line) {
 	node_data_type = fn->get_return_type();
-	bool check = fn->check_argument_types(arguments);
-	if(check == false) {
-		report_error("Arguments type is not same as declaration in " + fn->get_proc_name(), line);
+	// bool check = fn->check_argument_types(arguments);
+	if(!false) {
+		  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Arguments type is not same as declaration in ", lineno);
 	}
-	return check;
+	return true;
 }
 
 Eval_Result & Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
-  Eval_Result * res;
-	if(arguments.size() == 0) {
-		/* Function call with no arguments */
-		res = &fn->evaluate(file_buffer);
-	}
-	else {
-		list<Eval_Result*> argument_val_list;
-		
-		list<Ast *>::iterator itr_arg;
-		for(itr_arg = arguments.begin(); itr_arg != arguments.end() ; itr_arg++) {
-			Eval_Result & result = (*itr_arg)->evaluate(eval_env, file_buffer);
-			argument_val_list.push_back(&result);
-			
-		}
-		/* Function call with arguments */
-		res = &fn->evaluate(argument_val_list, file_buffer);	
-	}
-	if(node_data_type == int_data_type) {
-		Eval_Result * result = new Eval_Result_Value_Int(); 
-		if(res->get_result_enum() == int_result || res->get_result_enum() == bool_result) {
-			result->set_value(res->get_int_value());
-		}
-		else if(res->get_result_enum() == float_result) {
-			result->set_value((int) res->get_value_float());
-		}
-		return * result;
-	}
-  
-	else if(node_data_type == float_data_type) {
-		Eval_Result * result = new Eval_Result_Value_Float(); 
-		if(res->get_result_enum() == int_result || res->get_result_enum() == bool_result) {
-			result->set_value_float((float) res->get_int_value());
-		}
-		else if(res->get_result_enum() == float_result) {
-			result->set_value_float(res->get_value_float());
-		}
-		return * result;
-	}
-	else if(node_data_type == void_data_type) {
-		return * res;
-	}
-	else {
-		report_error("Data-Type not defined for return type\n", NOLINE);
-	}  	
+  Eval_Result * res = new Eval_Result_Value_Int();
+  return *res ;		
 }
-#endif
+
+Code_For_Ast & Call_Ast::compile() {}
+Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}

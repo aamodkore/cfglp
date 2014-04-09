@@ -85,6 +85,13 @@ bool Program::variable_in_proc_map_check(string symbol)
 	return true;
 }
 
+Procedure * Program::get_procedure(string name) {
+	if( procedure_map.count(name) > 0) {
+		return procedure_map[name];
+	}
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Function: "+name+" not declared") ;
+}
+
 void Program::global_list_in_proc_map_check()
 {
 	global_symbol_table.global_list_in_proc_map_check();
@@ -100,6 +107,11 @@ Procedure * Program::get_main_procedure(ostream & file_buffer)
 	}
 	
 	return NULL;
+}
+
+bool Program::is_procedure_declared(string name) {
+	if(procedure_map.find(name) == procedure_map.end()) return false;
+	else return true;
 }
 
 void Program::print()

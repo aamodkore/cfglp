@@ -47,6 +47,7 @@ public:
 	void delete_all();
 
 	void set_procedure_map(Procedure * proc, int line);
+	Procedure * get_procedure(string name);
 	void set_global_table(Symbol_Table & new_global_table);
 
 	Symbol_Table_Entry & get_symbol_table_entry(string variable);
@@ -60,6 +61,7 @@ public:
 	bool variable_in_proc_map_check(string symbol);
 	bool variable_in_symbol_list_check(string variable);
 	void global_list_in_proc_map_check();
+	bool is_procedure_declared(string name);
 
 	// compile
 	void compile();

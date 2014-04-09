@@ -31,6 +31,7 @@
 	int integer_value;
 	float float_value;
 	std::string * string_value;
+	Data_Type datatype ;
 	pair<Data_Type, string> * decl;
 	list<Ast *> * ast_list;
 	Ast * ast;
@@ -45,24 +46,27 @@
 %token <integer_value> INTEGER_NUMBER BBNUM
 %token <float_value> FLOAT_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO
+%token RETURN INTEGER FLOAT DOUBLE VOID IF ELSE GOTO
 %token ASSIGN NE EQ LT LE GT GE
 
 
 %type <symbol_table> optional_variable_declaration_list
 %type <symbol_table> variable_declaration_list
 %type <symbol_entry> variable_declaration
+%type <symbol_table> argument_list
 %type <decl> declaration
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
 %type <ast_list> executable_statement_list
 %type <ast_list> assignment_statement_list
+%type <ast_list> expression_list
 %type <ast> assignment_statement
 %type <ast> if_else_statement
 %type <ast> goto_statement
 %type <ast> return_statement
 %type <ast> variable
 %type <ast> constant
+%type <datatype> data_type
 
 %type <ast> expression
 %type <ast> identifier
@@ -73,7 +77,7 @@
 %type <ast> arithmetic_expression
 %type <ast> comparison_expression
 %type <ast> equality_expression
-//%type <ast> function_call
+%type <ast> function_call
 
 %type <rel_op> comparison_operator
 %type <rel_op> equality_operator
@@ -83,16 +87,58 @@
 %%
 
 program:
-	optional_declaration_list procedure_definition
-	{
-	if (NOT_ONLY_PARSE)
-	{
-		CHECK_INVARIANT((current_procedure != NULL), "Current procedure cannot be null");
+	optional_declaration_list procedure_list
+;
 
-		program_object.set_procedure_map(current_procedure, get_line_number());
-		program_object.global_list_in_proc_map_check();
+procedure_list :
+	procedure_declaration_list procedure_definition_list
+;
+
+procedure_declaration_list:
+	procedure_declaration_list procedure_declaration
+|
+	procedure_declaration
+;
+
+procedure_declaration :
+	data_type NAME '(' ')' ';'
+	{
+		if(program_object.is_procedure_declared(*$2)) {
+			int line = get_line_number();
+			report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Procedure " + *$2 + " already declared\n", line);
+		}
+		if(program_object.variable_in_symbol_list_check(*$2)) {
+			int line = get_line_number();
+			report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Procedure " + *$2 + " same as global variable " + *$2 , line);
+		}
+		int line = get_line_number();
+		Procedure * proc = new Procedure($1, *$2, line);
+		program_object.set_procedure_map(proc, line);			
 	}
-	}
+|
+	data_type NAME '(' argument_list ')' ';'
+	{
+		if(program_object.is_procedure_declared(*$2)) {
+			int line = get_line_number();
+			report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Procedure " + *$2 + " declared twice" , line);
+		}
+		if(program_object.variable_in_symbol_list_check(*$2)) {
+			int line = get_line_number();
+			report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Procedure " + *$2 + " same as global variable " + *$2 , line);
+		}
+		int line = get_line_number();
+		Procedure * proc = new Procedure($1, *$2,line);
+		proc->set_argument_list(*$4);
+		program_object.set_procedure_map(proc, line);	
+	} 
+;
+
+data_type:
+	VOID		{ $$ = void_data_type; }  
+|
+	INTEGER		{ $$ = int_data_type; } 	
+|
+	FLOAT		{ $$ = float_data_type; }
 ;
 
 optional_declaration_list:
@@ -117,6 +163,12 @@ optional_declaration_list:
 	}
 ;
 
+procedure_definition_list:
+	procedure_definition_list procedure_definition
+|
+	procedure_definition
+;
+
 procedure_definition:
 	NAME '(' ')'
 	{
@@ -126,7 +178,8 @@ procedure_definition:
 
 		string proc_name = *$1;
 
-		current_procedure = new Procedure(void_data_type, proc_name, get_line_number());
+		CHECK_INVARIANT(program_object.is_procedure_declared(proc_name), "Procedure not declared") ;
+		current_procedure = program_object.get_procedure(proc_name) ;
 	}
 	}
 
@@ -373,7 +426,7 @@ executable_statement_list:
 |
 	assignment_statement_list  return_statement
 	{
-		 // return_statement_used_flag = true;					// Current procedure has an occurrence of return statement
+		 return_statement_used_flag = true;					// Current procedure has an occurrence of return statement
 
 		if ($1 != NULL)
 			$$ = $1;
@@ -483,11 +536,11 @@ return_statement :
 	RETURN ';'
 	{
 		$$ = new Return_Ast(get_line_number());
-		/*
+		
 		if(current_procedure->get_return_type() == void_data_type) {
 			return_statement_used_flag = true;
 		}
-		*/
+		
 	}
 ;
 
@@ -543,18 +596,16 @@ unary_expression:
 	{
 		$$ = $1; 
 	}
-;
-
-/* 
+ 
 |
 	function_call
 	{	
 		$$ = $1 ;
 	}
 ;
-*/
 
-/*
+
+
 function_call:
 	NAME '(' expression_list ')' 
 	{
@@ -570,7 +621,7 @@ function_call:
 		$$->check_ast();
 	}		
 ;
-*/
+
 multiplicative_expression:
 	multiplicative_expression '*' unary_expression
 	{
@@ -641,7 +692,7 @@ equality_expression :
 expression: equality_expression { $$ = $1; }
 ;
 
-/*
+
 expression_list :
 	expression_list ',' expression
 	{
@@ -655,7 +706,7 @@ expression_list :
 		$$->push_back($1);
 	}
 ;
-*/
+
 
 
 comparison_operator :

@@ -72,6 +72,7 @@ class Parser: public ParserBase
 
 	int get_line_number();					// Used for errors
 
+	bool return_statement_used_flag;
 	bool NOT_ONLY_PARSE;
 
     private:
