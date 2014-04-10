@@ -155,6 +155,14 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 	return NULL;
 }
 
+bool Procedure::check_argument_types(list<Ast *> & arg_types) {
+	return argument_symbol_table.check_ordered_data_types(arg_types);
+}
+
+bool Procedure::check_argument_types(Symbol_Table & arg_types) {
+        return argument_symbol_table.check_ordered_data_types(arg_types);
+}
+
 bool Procedure::basic_block_exists(int no) {	
 	list<Basic_Block *>::iterator i;
 	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++) {

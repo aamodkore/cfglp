@@ -87,6 +87,9 @@ public:
 	int get_size();
 	void set_size(int n);
 
+	bool check_ordered_data_types(list<Ast *> & ) ;
+	bool check_ordered_data_types(Symbol_Table & ) ;
+
 	void print_assembly(ostream & file_buffer);
 };
 

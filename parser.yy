@@ -261,6 +261,8 @@ procedure_name :
 
 		CHECK_INVARIANT(program_object.is_procedure_declared(proc_name), "Procedure not declared") ;
 		current_procedure = program_object.get_procedure(proc_name) ;
+		report_violation_of_condition(current_procedure->check_argument_types(*$3),
+				"Arguments in proccedure definition and declararion don't match", get_line_number()) ;
 	}
 	}
 ;
@@ -631,9 +633,8 @@ return_statement :
 	RETURN expression ';'
 	{
 		$$ = new Return_Ast($2, get_line_number());
-		if(current_procedure->get_return_type() != ($2)->get_data_type()) {
-			// report_error("Return value does not match procedure declaration", get_line_number());
-		}
+		report_violation_of_condition(current_procedure->get_return_type() == ($2)->get_data_type(),
+							"Return value does not match procedure declaration", get_line_number());
 	}
 ;
 
@@ -704,14 +705,16 @@ function_call:
 	{
 		$$ = new Call_Ast(program_object.get_procedure(*$1), *$3);
 		int line = get_line_number();	
-		$$->check_ast();		
+		report_violation_of_condition($$->check_ast(),
+			"Invalid arguments in function call", get_line_number()) ;		
 	}	
 	|	
 	NAME '(' ')'
 	{
 		$$ = new Call_Ast(program_object.get_procedure(*$1));
 		int line = get_line_number();
-		$$->check_ast();
+		report_violation_of_condition($$->check_ast(),
+			"Invalid arguments in function call", get_line_number()) ;
 	}		
 ;
 

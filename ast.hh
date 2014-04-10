@@ -167,6 +167,7 @@ public:
 	Goto_Ast();
 	~Goto_Ast();
 
+	virtual bool check_ast() ;
 	virtual void print(ostream & file_buffer) = 0 ;
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
   
@@ -202,6 +203,7 @@ public:
 	Conditional_Goto_Ast(Ast* cond, int if_g, int else_g);
 	~Conditional_Goto_Ast();
 
+	bool check_ast() ;
 	void print(ostream & file_buffer);
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 

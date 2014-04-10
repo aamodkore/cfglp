@@ -67,6 +67,8 @@ public:
 
 	Eval_Result & evaluate(ostream & file_buffer);
 
+	bool check_argument_types(list<Ast *> &) ;
+	bool check_argument_types(Symbol_Table &) ;
 	bool variable_in_symbol_list_check(string variable);
 	bool basic_block_exists(int no);
 

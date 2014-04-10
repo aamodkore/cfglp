@@ -645,6 +645,8 @@ Goto_Ast::Goto_Ast() {}
 
 Goto_Ast::~Goto_Ast() {}
 
+bool Goto_Ast::check_ast() { return true ; }
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -694,6 +696,11 @@ Conditional_Goto_Ast::Conditional_Goto_Ast(Ast* cond, int if_g, int else_g) {
 
 Conditional_Goto_Ast::~Conditional_Goto_Ast() {
 	if (!condition) delete condition ;
+}
+
+bool Conditional_Goto_Ast::check_ast() {
+	CHECK_INVARIANT((condition != NULL), "Condition in IF statement cannot be null") ;
+    CHECK_INVARIANT(typeid(*condition)!=typeid(Call_Ast), "Variable cannot be a function") ;
 }
 
 void Conditional_Goto_Ast::print(ostream & file_buffer) {

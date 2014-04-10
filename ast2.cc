@@ -54,6 +54,8 @@ bool Relational_Expr_Ast::check_ast() {
   if (lhs->get_data_type() == rhs->get_data_type())
     {
       node_data_type = int_data_type;
+      CHECK_INVARIANT(typeid(*lhs)!=typeid(Call_Ast), "Variable cannot be a function") ;
+      CHECK_INVARIANT(typeid(*lhs)!=typeid(Call_Ast), "Variable cannot be a function") ;
       return true;
     }
   report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Relational statement data type not compatible", lineno);
@@ -895,6 +897,7 @@ Unary_Ast::~Unary_Ast() {}
 bool Unary_Ast::check_ast() {
   if(rhs->get_data_type() == int_data_type || rhs->get_data_type() == float_data_type ){
     node_data_type = rhs->get_data_type();
+    CHECK_INVARIANT(typeid(*rhs)!=typeid(Call_Ast), "Variable cannot be a function") ;
     return true;
   }
   report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Unary expression statement data type not compatible", lineno);
@@ -1198,14 +1201,9 @@ void Call_Ast::print(ostream & file_buffer) {
 }
 
 bool Call_Ast::check_ast() {
-  /*
+  
 	node_data_type = fn->get_return_type();
-	// bool check = fn->check_argument_types(arguments);
-	if(!false) {
-		  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Arguments type is not same as declaration in ", 0);
-	}
-  */
-	return true;
+	return (fn->check_argument_types(arguments)) ;
 }
 
 Eval_Result & Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer){
@@ -1229,6 +1227,7 @@ Code_For_Ast & Call_Ast::compile() {
       ++arg_itr, ++param_itr)
   {
     CHECK_INVARIANT(((*arg_itr) != NULL), "Arguments cannot be null");
+    CHECK_INVARIANT(typeid(*(*arg_itr))!=typeid(Call_Ast), "Variable cannot be a function") ;
     int step = 0;
     Tgt_Op opr ;
     Code_For_Ast & arg_stmt = (*arg_itr)->compile() ;
@@ -1301,12 +1300,13 @@ Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
 
   list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
   list<Symbol_Table_Entry *> * parameters = fn->get_arg_symbol_table()->get_variable_table() ;
-  
+
   for (arg_itr = arguments.begin(), param_itr = parameters->begin(); 
       arg_itr != arguments.end() && param_itr != parameters->end(); 
       ++arg_itr, ++param_itr)
   {
     CHECK_INVARIANT(((*arg_itr) != NULL), "Arguments cannot be null");
+    CHECK_INVARIANT(typeid(*(*arg_itr))!=typeid(Call_Ast), "Variable cannot be a function") ;
     int step = 0;
     Tgt_Op opr ;
     lra.optimize_lra(mc_2r, NULL, *arg_itr) ;

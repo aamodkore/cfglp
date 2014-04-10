@@ -132,6 +132,42 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 	}
 }
 
+
+bool Symbol_Table::check_ordered_data_types(list<Ast *> & arg_types) {
+	list<Symbol_Table_Entry *>::iterator itr_s;
+	list<Ast *>::iterator itr_d = arg_types.begin();
+
+	if(variable_table.size() != arg_types.size()) {
+		return false;
+	}
+	for (itr_s = variable_table.begin(); itr_s != variable_table.end(); itr_s++, itr_d++)
+	{
+		if( (*itr_s)->get_data_type() != (*itr_d)->get_data_type() ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool Symbol_Table::check_ordered_data_types(Symbol_Table & arg_types) {
+	list<Symbol_Table_Entry *>::iterator itr_s;
+	list<Symbol_Table_Entry *>::iterator itr_d = arg_types.get_variable_table()->begin();
+
+	if(variable_table.size() != arg_types.get_variable_table()->size()) {
+		return false;
+	}
+	for (itr_s = variable_table.begin(); itr_s != variable_table.end(); itr_s++, itr_d++)
+	{
+		if( (*itr_s)->get_data_type() != (*itr_d)->get_data_type() ) {
+			return false;
+		}
+		if( (*itr_s)->get_variable_name() != (*itr_d)->get_variable_name() ) {
+			return false;
+		}
+	}
+	return true;
+}
+
 void Symbol_Table::print(ostream & file_buffer)
 {
 	list<Symbol_Table_Entry *>::iterator i;
