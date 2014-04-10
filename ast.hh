@@ -145,9 +145,11 @@ public:
 
 class Return_Ast:public Ast
 {
-
+	Ast * return_exp;
+	
 public:
 	Return_Ast(int line);
+	Return_Ast(Ast *, int line);
 	~Return_Ast();
 
 	void print(ostream & file_buffer);
@@ -365,7 +367,7 @@ public:
 
 	void print(ostream & file_buffer);
 	Data_Type get_data_type();
-	bool check_ast(int line);
+	bool check_ast();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
 	Code_For_Ast & compile();

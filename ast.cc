@@ -534,6 +534,15 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile_and_optimize_ast(Lra_Outcome & lra
 Return_Ast::Return_Ast(int line)
 {
 	lineno = line;
+	return_exp = NULL;
+	node_data_type = void_data_type;
+	ast_num_child = zero_arity;
+}
+
+Return_Ast::Return_Ast(Ast * ret, int line)
+{
+	lineno = line;
+	return_exp = ret;
 	node_data_type = void_data_type;
 	ast_num_child = zero_arity;
 }

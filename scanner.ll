@@ -140,7 +140,7 @@ goto		{
 				return matched()[0];
 			}
 
-[:{}();]	{
+[:{}();,]	{
 				store_token_name("META CHAR");
 				return matched()[0];
 			}

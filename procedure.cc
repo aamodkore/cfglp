@@ -85,12 +85,16 @@ Data_Type Procedure::get_return_type()
 
 bool Procedure::variable_in_symbol_list_check(string variable)
 {
-	return local_symbol_table.variable_in_symbol_list_check(variable);
+	return (local_symbol_table.variable_in_symbol_list_check(variable) 
+	|| argument_symbol_table.variable_in_symbol_list_check(variable));
 }
 
 Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 {
-	return local_symbol_table.get_symbol_table_entry(variable_name);
+	if(local_symbol_table.variable_in_symbol_list_check(variable_name)) 
+		return local_symbol_table.get_symbol_table_entry(variable_name);
+	else 
+		return argument_symbol_table.get_symbol_table_entry(variable_name);
 }
 
 void Procedure::print(ostream & file_buffer)

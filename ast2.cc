@@ -1194,12 +1194,14 @@ void Call_Ast::print(ostream & file_buffer) {
 	file_buffer << ")";
 }
 
-bool Call_Ast::check_ast(int line) {
+bool Call_Ast::check_ast() {
+  /*
 	node_data_type = fn->get_return_type();
 	// bool check = fn->check_argument_types(arguments);
 	if(!false) {
-		  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Arguments type is not same as declaration in ", lineno);
+		  report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Arguments type is not same as declaration in ", 0);
 	}
+  */
 	return true;
 }
 

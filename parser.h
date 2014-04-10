@@ -80,7 +80,6 @@ class Parser: public ParserBase
         int lex();
 
 	void bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number); 
-        
 	void executeAction(int ruleNr);
         void errorRecovery();
         int lookup(bool recovery);

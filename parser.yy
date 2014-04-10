@@ -53,6 +53,7 @@
 %type <symbol_table> optional_variable_declaration_list
 %type <symbol_table> variable_declaration_list
 %type <symbol_entry> variable_declaration
+%type <symbol_entry> argument
 %type <symbol_table> argument_list
 %type <decl> declaration
 %type <basic_block_list> basic_block_list
@@ -87,7 +88,9 @@
 %%
 
 program:
-	optional_declaration_list procedure_list
+	variable_declaration_list procedure_list
+|
+	procedure_list
 ;
 
 procedure_list :
@@ -141,27 +144,57 @@ data_type:
 	FLOAT		{ $$ = float_data_type; }
 ;
 
-optional_declaration_list:
+
+argument_list:
+	argument_list ',' argument
 	{
-	if (NOT_ONLY_PARSE)
-	{
-		Symbol_Table * global_table = new Symbol_Table();
-		program_object.set_global_table(*global_table);
-	}
+		// if declaration is local then no need to check in global list
+		// if declaration is global then this list is global list
+
+		int line = get_line_number();
+		string var_name = $3->get_variable_name();
+		program_object.variable_in_proc_map_check($3->get_variable_name());
+
+		if ($1 != NULL)
+		{
+			CHECK_INVARIANT((!($1->variable_in_symbol_list_check(var_name))), "Variable is declared twice in the arguments");
+			$$ = $1;
+		}
+
+		else
+			$$ = new Symbol_Table();
+
+		$$->push_symbol($3);
 	}
 |
-	variable_declaration_list
+	argument
 	{
-	if (NOT_ONLY_PARSE)
-	{
-		Symbol_Table * global_table = $1;
+		int line = get_line_number();
+		program_object.variable_in_proc_map_check($1->get_variable_name());
 
-		CHECK_INVARIANT((global_table != NULL), "Global declarations cannot be null");
-
-		program_object.set_global_table(*global_table);
-	}
+		$$ = new Symbol_Table();
+		$$->push_symbol($1);	
 	}
 ;
+
+
+argument:
+	INTEGER NAME
+	{
+		int line = get_line_number();
+		$$ = new Symbol_Table_Entry(*$2, int_data_type, line);
+		delete $2;
+	}
+|
+	FLOAT NAME
+	{
+		int line = get_line_number();
+		$$ = new Symbol_Table_Entry(*$2, float_data_type, line);
+		delete $2;
+	}
+;
+
+
 
 procedure_definition_list:
 	procedure_definition_list procedure_definition
@@ -169,20 +202,11 @@ procedure_definition_list:
 	procedure_definition
 ;
 
+
+
+
 procedure_definition:
-	NAME '(' ')'
-	{
-	if (NOT_ONLY_PARSE)
-	{
-		CHECK_INVARIANT(($1 != NULL), "Procedure name cannot be null");
-
-		string proc_name = *$1;
-
-		CHECK_INVARIANT(program_object.is_procedure_declared(proc_name), "Procedure not declared") ;
-		current_procedure = program_object.get_procedure(proc_name) ;
-	}
-	}
-
+	procedure_name 
 	'{' optional_variable_declaration_list
 	{
 	if (NOT_ONLY_PARSE)
@@ -190,7 +214,7 @@ procedure_definition:
 
 		CHECK_INVARIANT((current_procedure != NULL), "Current procedure cannot be null");
 
-		Symbol_Table * local_table = $6;
+		Symbol_Table * local_table = $3;
 
 		if (local_table == NULL)
 			local_table = new Symbol_Table();
@@ -203,12 +227,40 @@ procedure_definition:
 	{
 	if (NOT_ONLY_PARSE)
 	{
-		list<Basic_Block *> * bb_list = $8;
+		list<Basic_Block *> * bb_list = $5;
 
 		CHECK_INVARIANT((current_procedure != NULL), "Current procedure cannot be null");
 		CHECK_INVARIANT((bb_list != NULL), "Basic block list cannot be null");
 
 		current_procedure->set_basic_block_list(*bb_list);
+	}
+	}
+;
+
+procedure_name : 
+	NAME '('')'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		CHECK_INVARIANT(($1 != NULL), "Procedure name cannot be null");
+
+		string proc_name = *$1;
+
+		CHECK_INVARIANT(program_object.is_procedure_declared(proc_name), "Procedure not declared") ;
+		current_procedure = program_object.get_procedure(proc_name) ;
+	}
+	}
+|
+	NAME '(' argument_list ')'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		CHECK_INVARIANT(($1 != NULL), "Procedure name cannot be null");
+
+		string proc_name = *$1;
+
+		CHECK_INVARIANT(program_object.is_procedure_declared(proc_name), "Procedure not declared") ;
+		current_procedure = program_object.get_procedure(proc_name) ;
 	}
 	}
 ;
@@ -255,6 +307,10 @@ variable_declaration_list:
 		decl_list->push_symbol(decl_stmt);
 
 		$$ = decl_list;
+
+		if(current_procedure == NULL) {
+			program_object.set_global_table(*$$);
+		}
 	}
 	}
 |
@@ -285,6 +341,10 @@ variable_declaration_list:
 
 		decl_list->push_symbol(decl_stmt);
 		$$ = decl_list;
+
+		if(current_procedure == NULL) {
+			program_object.set_global_table(*$$);
+		}
 	}
 	}
 ;
@@ -310,20 +370,22 @@ variable_declaration:
 ;
 
 declaration:
-	INTEGER NAME
+	data_type NAME
 	{
 	if (NOT_ONLY_PARSE)
 	{
 		CHECK_INVARIANT(($2 != NULL), "Name cannot be null");
 
 		string name = *$2;
-		Data_Type type = int_data_type;
+		Data_Type type = $1;
 
 		pair<Data_Type, string> * declar = new pair<Data_Type, string>(type, name);
 
 		$$ = declar;
 	}
 	}
+;
+/*
 |
 	FLOAT NAME
 	{
@@ -355,7 +417,7 @@ declaration:
 	}
 	}
 ;
-
+*/
 basic_block_list:
 	basic_block_list basic_block
 	{
@@ -493,6 +555,29 @@ assignment_statement_list:
 		$$ = assign_list_new;
 	}
 	}
+|
+	assignment_statement_list function_call ';'
+	{
+	if (NOT_ONLY_PARSE)
+	{
+		list<Ast *> * assign_list = $1;
+		Ast * func_call = $2;
+		list<Ast *> * assign_list_new = NULL;
+
+		CHECK_INVARIANT((func_call != NULL), "Assignment statement cannot be null");
+
+		if (assign_list == NULL)
+			assign_list_new = new list<Ast *>;
+
+		else
+			assign_list_new = assign_list;
+
+		assign_list_new->push_back(func_call);
+
+		$$ = assign_list_new;
+	}
+	}
+
 ;
 
 assignment_statement:
@@ -541,6 +626,14 @@ return_statement :
 			return_statement_used_flag = true;
 		}
 		
+	}
+|
+	RETURN expression ';'
+	{
+		$$ = new Return_Ast($2, get_line_number());
+		if(current_procedure->get_return_type() != ($2)->get_data_type()) {
+			// report_error("Return value does not match procedure declaration", get_line_number());
+		}
 	}
 ;
 
