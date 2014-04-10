@@ -1219,9 +1219,14 @@ Code_For_Ast & Call_Ast::compile() {
   CHECK_INVARIANT((fn != NULL), "Function cannot be null");
   int offset = 0 ;
   list<Ast *>::iterator arg_itr ;
-  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+  list<Symbol_Table_Entry *>::iterator param_itr ;
 
-  for (arg_itr = arguments.begin(); arg_itr != arguments.end(); ++arg_itr)
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+  list<Symbol_Table_Entry *> * parameters = fn->get_arg_symbol_table()->get_variable_table() ;
+
+  for (arg_itr = arguments.begin(), param_itr = parameters->begin(); 
+      arg_itr != arguments.end() && param_itr != parameters->end(); 
+      ++arg_itr, ++param_itr)
   {
     CHECK_INVARIANT(((*arg_itr) != NULL), "Arguments cannot be null");
     int step = 0;
@@ -1240,10 +1245,11 @@ Code_For_Ast & Call_Ast::compile() {
       CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Argument Type");
     }
     Ics_Opd * arg_reg = new Register_Addr_Opd(areg);
-    
+    Ics_Opd * res_reg = new Mem_Addr_Opd(*(*param_itr));
+  
     if (arg_stmt.get_icode_list().empty() == false)
       ic_list.splice(ic_list.end(), arg_stmt.get_icode_list());
-    ic_list.push_back(new Store_Param_IC_Stmt(opr, arg_reg, arg_reg, offset)) ;
+    ic_list.push_back(new Store_Param_IC_Stmt(opr, res_reg, arg_reg, offset)) ;
     offset += step ;
     areg->reset_use_for_expr_result();
     areg->clear_lra_symbol_list();
@@ -1291,9 +1297,14 @@ Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
   CHECK_INVARIANT((fn != NULL), "Function cannot be null");
   int offset = 0 ;
   list<Ast *>::iterator arg_itr ;
-  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+  list<Symbol_Table_Entry *>::iterator param_itr ;
 
-  for (arg_itr = arguments.begin(); arg_itr != arguments.end(); ++arg_itr)
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+  list<Symbol_Table_Entry *> * parameters = fn->get_arg_symbol_table()->get_variable_table() ;
+  
+  for (arg_itr = arguments.begin(), param_itr = parameters->begin(); 
+      arg_itr != arguments.end() && param_itr != parameters->end(); 
+      ++arg_itr, ++param_itr)
   {
     CHECK_INVARIANT(((*arg_itr) != NULL), "Arguments cannot be null");
     int step = 0;
@@ -1313,10 +1324,11 @@ Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
       CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Argument Type");
     }
     Ics_Opd * arg_reg = new Register_Addr_Opd(areg);
-    
+    Ics_Opd * res_reg = new Mem_Addr_Opd(*(*param_itr));
+  
     if (arg_stmt.get_icode_list().empty() == false)
       ic_list.splice(ic_list.end(), arg_stmt.get_icode_list());
-    ic_list.push_back(new Store_Param_IC_Stmt(opr, arg_reg, arg_reg, offset)) ;
+    ic_list.push_back(new Store_Param_IC_Stmt(opr, res_reg, arg_reg, offset)) ;
     offset += step ;
     areg->reset_use_for_expr_result();
   }

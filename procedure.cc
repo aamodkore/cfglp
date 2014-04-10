@@ -103,12 +103,20 @@ Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 
 void Procedure::print(ostream & file_buffer)
 {
-	CHECK_INVARIANT((return_type == void_data_type), "Only void return type of funtion is allowed");
 
-	file_buffer << PROC_SPACE << "Procedure: main, Return Type: void\n";
+	file_buffer << PROC_SPACE << "Procedure: "<< name<<", Return Type: ";
+	switch(return_type)
+	{
+	case int_data_type: file_buffer << "INT\n"; break;
+	case float_data_type: file_buffer << "FLOAT\n"; break;
+	case void_data_type: file_buffer << "VOID\n"; break;
+	defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Return Type");
+	} 
 
 	if ((command_options.is_show_symtab_selected()) || (command_options.is_show_program_selected()))
 	{
+		file_buffer << "   Fromal Parameter List\n";
+		argument_symbol_table.print_reverse(file_buffer);
 		file_buffer << "   Local Declarartions\n";
 		local_symbol_table.print(file_buffer);
 	}

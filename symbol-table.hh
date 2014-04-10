@@ -64,6 +64,7 @@ public:
 	void set_table_scope(Table_Scope list_scope);
 
 	void print(ostream & file_buffer);
+	void print_reverse(ostream & file_buffer);
 
 	void push_symbol(Symbol_Table_Entry * variable);
 	list<Symbol_Table_Entry *> * get_variable_table() ;

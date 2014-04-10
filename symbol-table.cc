@@ -149,7 +149,7 @@ void Symbol_Table::print(ostream & file_buffer)
 		{
 		case int_data_type: file_buffer << " Type: INT"; break;
 		case float_data_type: file_buffer << " Type: FLOAT"; break;
-		defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Variable data type can only be int");
+		defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Variable data type");
 		} 
 
 		file_buffer << " Entity Type: VAR";
@@ -157,8 +157,42 @@ void Symbol_Table::print(ostream & file_buffer)
 		if (start_off == end_off)
 			file_buffer << " (No offset assigned yet)\n";
 		else
-			file_buffer << " Start Offset: " << start_off << " End Offset: " << end_off << "\n";
+			file_buffer << " Start Offset: " << ((start_off>=0)?start_off:(-start_off)) 
+						<< " End Offset: " << ((end_off>=0)?end_off:(-end_off)) << "\n";
 	}
+}
+
+void Symbol_Table::print_reverse(ostream & file_buffer)
+{
+	list<Symbol_Table_Entry *>::iterator i;
+
+	i = variable_table.end(); 
+	while (i != variable_table.begin()) 
+	{
+		--i ;
+		if ((*i)==NULL) break ;
+		string name = (*i)->get_variable_name();
+		Data_Type dt = (*i)->get_data_type();
+		int start_off = (*i)->get_start_offset();
+		int end_off = (*i)->get_end_offset();
+
+		file_buffer << "   Name: " << name;
+
+		switch(dt)
+		{
+		case int_data_type: file_buffer << " Type: INT"; break;
+		case float_data_type: file_buffer << " Type: FLOAT"; break;
+		defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Variable data type");
+		} 
+
+		file_buffer << " Entity Type: VAR";
+
+		if (start_off == end_off)
+			file_buffer << " (No offset assigned yet)\n";
+		else
+			file_buffer << " Start Offset: " << ((start_off>=0)?start_off:(-start_off)) 
+						<< " End Offset: " << ((end_off>=0)?end_off:(-end_off)) << "\n";
+	} ;
 }
 
 // Compile
