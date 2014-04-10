@@ -100,28 +100,25 @@ list<Icode_Stmt *> & Basic_Block::compile()
 	{
 		Ast * ast = *i;
 
-		if (typeid(*ast) != typeid(Return_Ast))
+		if (command_options.is_do_lra_selected() == true)
+		  {
+		    Lra_Outcome lra;
+		    ast_code = ast->compile_and_optimize_ast(lra);
+		}
+
+		else if (command_options.is_do_compile_selected() || command_options.is_show_ic_selected())
+			ast_code = ast->compile();
+
+		else
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Illegal cmd option");
+
+		list<Icode_Stmt *> & ast_icode_list = ast_code.get_icode_list();
+		if (ast_icode_list.empty() == false)
 		{
-			if (command_options.is_do_lra_selected() == true)
-			  {
-			    Lra_Outcome lra;
-			    ast_code = ast->compile_and_optimize_ast(lra);
-			}
-
-			else if (command_options.is_do_compile_selected() || command_options.is_show_ic_selected())
-				ast_code = ast->compile();
-
+			if (bb_icode_list.empty())
+				bb_icode_list = ast_icode_list;
 			else
-				CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Illegal cmd option");
-
-			list<Icode_Stmt *> & ast_icode_list = ast_code.get_icode_list();
-			if (ast_icode_list.empty() == false)
-			{
-				if (bb_icode_list.empty())
-					bb_icode_list = ast_icode_list;
-				else
-					bb_icode_list.splice(bb_icode_list.end(), ast_icode_list);
-			}
+				bb_icode_list.splice(bb_icode_list.end(), ast_icode_list);
 		}
 	}
 

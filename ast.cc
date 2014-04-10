@@ -565,14 +565,75 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 
 Code_For_Ast & Return_Ast::compile()
 {
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	  
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	Register_Descriptor * result_reg = NULL;
+
+	if (return_exp != NULL) {
+		Code_For_Ast & return_exp_stmt = return_exp->compile();
+		Register_Descriptor * rreg = return_exp_stmt.get_reg();
+
+		Ics_Opd * return_exp_reg = new Register_Addr_Opd(rreg);
+
+		if (return_exp_stmt.get_icode_list().empty() == false)
+			ic_list = return_exp_stmt.get_icode_list();
+
+		Tgt_Op opr ;
+		if (rreg->get_value_type() == int_num) {
+			result_reg = machine_dscr_object.get_fn_ret_register();
+			opr = mv ;
+		}
+		if (rreg->get_value_type() == float_num) {
+			result_reg = machine_dscr_object.get_fn_ret_float_register();
+			opr = mv_d ;
+		}
+		result_reg->set_used_for_expr_result();
+		Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+		ic_list.push_back(new Move_IC_Stmt(opr, return_exp_reg, register_result)) ;
+
+		// Free the previous result register.
+		rreg->reset_use_for_expr_result();
+		rreg->clear_lra_symbol_list();
+	}
+	Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+	return rel_expr_code;
 }
 
 Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	Register_Descriptor * result_reg = NULL;
+
+	if (return_exp != NULL) {
+		lra.optimize_lra(mc_2r, NULL, return_exp);
+		Code_For_Ast & return_exp_stmt = return_exp->compile_and_optimize_ast(lra);
+		Register_Descriptor * rreg = return_exp_stmt.get_reg();
+
+		Ics_Opd * return_exp_reg = new Register_Addr_Opd(rreg);
+
+		if (return_exp_stmt.get_icode_list().empty() == false)
+			ic_list = return_exp_stmt.get_icode_list();
+
+		Tgt_Op opr ;
+		if (rreg->get_value_type() == int_num) {
+			if (!result_reg) result_reg = machine_dscr_object.get_fn_ret_register();
+			opr = mv ;
+		}
+		if (rreg->get_value_type() == float_num) {
+			if (!result_reg) result_reg = machine_dscr_object.get_fn_ret_float_register();
+			opr = mv_d ;
+		}
+		result_reg->set_used_for_expr_result();
+		Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+
+		ic_list.push_back(new Move_IC_Stmt(opr, return_exp_reg, register_result)) ;
+
+		// Free the previous result register.
+		rreg->reset_use_for_expr_result();
+	}
+	Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+	return rel_expr_code;
 }
 
 template class Number_Ast<int>;

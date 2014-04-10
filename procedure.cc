@@ -83,6 +83,10 @@ Data_Type Procedure::get_return_type()
 	return return_type;
 }
 
+Symbol_Table * Procedure::get_arg_symbol_table()  {
+	return &argument_symbol_table ;
+}
+
 bool Procedure::variable_in_symbol_list_check(string variable)
 {
 	return (local_symbol_table.variable_in_symbol_list_check(variable) 
@@ -183,11 +187,19 @@ void Procedure::compile()
 {
 	curr_procedure = this;
 	// assign offsets to local symbol table
-	local_symbol_table.set_start_offset_of_first_symbol(4);
-	local_symbol_table.set_size(4);
+	// local_symbol_table.set_start_offset_of_first_symbol(4);
+	// local_symbol_table.set_size(4);
 	local_symbol_table.assign_offsets();
 
-	// compile the program by visiting each basic block
+	// argument_symbol_table.set_start_offset_of_first_symbol(4);
+	// argument_symbol_table.set_size(4);
+	argument_symbol_table.assign_offsets();
+
+	int arg_tbl_size = argument_symbol_table.get_size() ;
+	argument_symbol_table.set_start_offset_of_first_symbol(-arg_tbl_size-8);
+	argument_symbol_table.set_size(-arg_tbl_size-8);
+	argument_symbol_table.assign_offsets();
+// compile the program by visiting each basic block
 	list<Basic_Block *>::iterator i;
 	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
 	{
@@ -231,15 +243,13 @@ void Procedure::print_prologue(ostream & file_buffer)
 
 	prologue << name << ":\t\t\t\t# .globl makes main know to the \n\t\t\t\t# outside of the program.\n\
 # Prologue begins \n\
-	sw $fp, 0($sp)\t\t# Save the frame pointer\n\
-	sub $fp, $sp, 4\t\t# Update the frame pointer\n";
+	sw $ra, 0($sp)\t\t# Save the return address\n\
+	sw $fp, -4($sp)\t\t# Save the frame pointer\n\
+	sub $fp, $sp, 8\t\t# Update the frame pointer\n";
 
 	int size = local_symbol_table.get_size();
-	if (size > 0)
-		prologue << "\n\tsub $sp, $sp, " << size + 4 << "\t\t# Make space for the locals\n";
-	else
-		prologue << "\n\tsub $sp, $sp, " << 4 << "\t\t#Make space for the locals\n";
-
+	prologue << "\n\tsub $sp, $sp, " << size + 8 << "\t\t# Make space for the locals\n";
+	
 	prologue << "# Prologue ends\n\n";
 
 	file_buffer << prologue.str();
@@ -250,13 +260,9 @@ void Procedure::print_epilogue(ostream & file_buffer)
 	stringstream epilogue;
 
 	int size = local_symbol_table.get_size();
-	if(size == 0) { 	
-	  epilogue << "\n#Epilogue Begins\n\tadd $sp, $sp, " << 4 << "\n";
-	  epilogue << "\tlw $fp, 0($sp)  \n\tjr        $31\t\t# Jump back to the operating system.\n# Epilogue Ends\n\n";
-	}
-	else {
-	   epilogue << "\n# Epilogue Begins\n\tadd $sp, $sp, " << size + 4 << "\n";
-	   epilogue << "\tlw $fp, 0($sp)  \n\tjr        $31\t\t# Jump back to the operating system.\n# Epilogue Ends\n\n";
+	{
+	   epilogue << "\n# Epilogue Begins\n\tadd $sp, $sp, " << size + 8 << "\n";
+	   epilogue << "\tlw $fp, -4($sp)  \n\tlw $ra, 0($sp)  \n\tjr        $31\t\t# Jump back to the operating system.\n# Epilogue Ends\n\n";
 	}
 
 	file_buffer << epilogue.str();

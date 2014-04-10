@@ -83,6 +83,10 @@ void Symbol_Table::global_list_in_proc_map_check()
 	}
 }
 
+list<Symbol_Table_Entry *> * Symbol_Table::get_variable_table() {
+	return &variable_table ;
+}
+
 bool Symbol_Table::variable_in_symbol_list_check(string variable)
 {
 	list<Symbol_Table_Entry *>::iterator i;
@@ -171,7 +175,7 @@ int Symbol_Table::get_start_offset_of_first_symbol()
 
 void Symbol_Table::set_size(int n)
 {
-	size_in_bytes;
+	size_in_bytes = n;
 }
 
 int Symbol_Table::get_size()

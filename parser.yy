@@ -146,25 +146,25 @@ data_type:
 
 
 argument_list:
-	argument_list ',' argument
+	argument ',' argument_list
 	{
 		// if declaration is local then no need to check in global list
 		// if declaration is global then this list is global list
 
 		int line = get_line_number();
-		string var_name = $3->get_variable_name();
-		program_object.variable_in_proc_map_check($3->get_variable_name());
+		string var_name = $1->get_variable_name();
+		program_object.variable_in_proc_map_check($1->get_variable_name());
 
-		if ($1 != NULL)
+		if ($3 != NULL)
 		{
-			CHECK_INVARIANT((!($1->variable_in_symbol_list_check(var_name))), "Variable is declared twice in the arguments");
-			$$ = $1;
+			CHECK_INVARIANT((!($3->variable_in_symbol_list_check(var_name))), "Variable is declared twice in the arguments");
+			$$ = $3;
 		}
 
 		else
 			$$ = new Symbol_Table();
 
-		$$->push_symbol($3);
+		$$->push_symbol($1);
 	}
 |
 	argument
@@ -790,13 +790,13 @@ expression_list :
 	expression_list ',' expression
 	{
 		$$ = $1 ;
-		$$->push_back($3);
+		$$->push_front($3);
 	}
 |
 	expression
 	{
 		$$ = new list<Ast *>;
-		$$->push_back($1);
+		$$->push_front($1);
 	}
 ;
 

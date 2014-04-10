@@ -262,9 +262,12 @@ Arithmetic_Expr_Ast::Arithmetic_Expr_Ast() {}
 Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {}
 
 bool Arithmetic_Expr_Ast::check_ast() {
+  CHECK_INVARIANT(lhs && rhs, "Operands of Arithmetic Expression cannot be null") ;
   if (lhs->get_data_type() == rhs->get_data_type())
     {
       node_data_type = lhs->get_data_type();
+      CHECK_INVARIANT(typeid(*lhs)!=typeid(Call_Ast), "Variable cannot be a function") ;
+      CHECK_INVARIANT(typeid(*rhs)!=typeid(Call_Ast), "Variable cannot be a function") ;
       return true;
     }
   report_violation_of_condition(CONTROL_SHOULD_NOT_REACH, "Arithmetic statement data type not compatible", lineno);
@@ -1210,5 +1213,147 @@ Eval_Result & Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
   return *res ;		
 }
 
-Code_For_Ast & Call_Ast::compile() {}
-Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {}
+Code_For_Ast & Call_Ast::compile() {
+  /*Procedure * fn;
+  list<Ast *> arguments;*/
+  CHECK_INVARIANT((fn != NULL), "Function cannot be null");
+  int offset = 0 ;
+  list<Ast *>::iterator arg_itr ;
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  for (arg_itr = arguments.begin(); arg_itr != arguments.end(); ++arg_itr)
+  {
+    CHECK_INVARIANT(((*arg_itr) != NULL), "Arguments cannot be null");
+    int step = 0;
+    Tgt_Op opr ;
+    Code_For_Ast & arg_stmt = (*arg_itr)->compile() ;
+    Register_Descriptor * areg = arg_stmt.get_reg() ;
+    if (areg->get_value_type() == int_num) {
+      opr = store ;
+      step = 4 ;
+    }
+    else if (areg->get_value_type() == float_num) {
+      opr = store ; /** CHANGE HERE ::: store --> store_d **/
+      step = 8 ;
+    }
+    else {
+      CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Argument Type");
+    }
+    Ics_Opd * arg_reg = new Register_Addr_Opd(areg);
+    
+    if (arg_stmt.get_icode_list().empty() == false)
+      ic_list.splice(ic_list.end(), arg_stmt.get_icode_list());
+    ic_list.push_back(new Store_Param_IC_Stmt(opr, arg_reg, arg_reg, offset)) ;
+    offset += step ;
+    areg->reset_use_for_expr_result();
+    areg->clear_lra_symbol_list();
+  }
+
+  ic_list.push_back(new Control_Flow_IC_Stmt(call, fn->get_proc_name(), offset)) ;
+
+  Register_Descriptor * result_reg = NULL;
+  Register_Descriptor * ret_val_reg = NULL ;
+  Tgt_Op opr ;
+
+  if (node_data_type==float_data_type) {
+    result_reg = machine_dscr_object.get_new_float_register();
+    ret_val_reg = machine_dscr_object.get_fn_ret_float_register() ;
+    opr = mv_d ;
+  }
+  else if (node_data_type==int_data_type) {
+    result_reg = machine_dscr_object.get_new_register();
+    ret_val_reg = machine_dscr_object.get_fn_ret_register() ;
+    opr = mv ;
+  }
+  else if (node_data_type==void_data_type) {
+    result_reg = NULL ;
+    ret_val_reg = NULL ;
+  }
+  else {
+    CHECK_INVARIANT(false, "Invalid return type") ;
+  }
+
+  if (result_reg && ret_val_reg) {
+    result_reg->set_used_for_expr_result();
+    Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+    Ics_Opd * register_ret_val = new Register_Addr_Opd(ret_val_reg);
+
+    ic_list.push_back( new Move_IC_Stmt(opr, register_ret_val, register_result)) ;
+  }
+
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+}
+
+
+
+Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
+  CHECK_INVARIANT((fn != NULL), "Function cannot be null");
+  int offset = 0 ;
+  list<Ast *>::iterator arg_itr ;
+  list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+  for (arg_itr = arguments.begin(); arg_itr != arguments.end(); ++arg_itr)
+  {
+    CHECK_INVARIANT(((*arg_itr) != NULL), "Arguments cannot be null");
+    int step = 0;
+    Tgt_Op opr ;
+    lra.optimize_lra(mc_2r, NULL, *arg_itr) ;
+    Code_For_Ast & arg_stmt = (*arg_itr)->compile_and_optimize_ast(lra) ;
+    Register_Descriptor * areg = arg_stmt.get_reg() ;
+    if (areg->get_value_type() == int_num) {
+      opr = store ;
+      step = 4 ;
+    }
+    else if (areg->get_value_type() == float_num) {
+      opr = store ; /** CHANGE HERE ::: store --> store_d **/
+      step = 8 ;
+    }
+    else {
+      CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Invalid Argument Type");
+    }
+    Ics_Opd * arg_reg = new Register_Addr_Opd(areg);
+    
+    if (arg_stmt.get_icode_list().empty() == false)
+      ic_list.splice(ic_list.end(), arg_stmt.get_icode_list());
+    ic_list.push_back(new Store_Param_IC_Stmt(opr, arg_reg, arg_reg, offset)) ;
+    offset += step ;
+    areg->reset_use_for_expr_result();
+  }
+  machine_dscr_object.clear_local_register_mappings() ;
+
+  ic_list.push_back(new Control_Flow_IC_Stmt(call, fn->get_proc_name(), offset)) ;
+
+  Register_Descriptor * result_reg = NULL;
+  Register_Descriptor * ret_val_reg = NULL ;
+  Tgt_Op opr ;
+
+  if (node_data_type==float_data_type) {
+    result_reg = machine_dscr_object.get_new_float_register();
+    ret_val_reg = machine_dscr_object.get_fn_ret_float_register() ;
+    opr = mv_d ;
+  }
+  else if (node_data_type==int_data_type) {
+    result_reg = machine_dscr_object.get_new_register();
+    ret_val_reg = machine_dscr_object.get_fn_ret_register() ;
+    opr = mv ;
+  }
+  else if (node_data_type==void_data_type) {
+    result_reg = NULL ;
+    ret_val_reg = NULL ;
+  }
+  else {
+    CHECK_INVARIANT(false, "Invalid return type") ;
+  }
+
+  if (result_reg && ret_val_reg) {
+    result_reg->set_used_for_expr_result();
+    Ics_Opd * register_result = new Register_Addr_Opd(result_reg);
+    Ics_Opd * register_ret_val = new Register_Addr_Opd(ret_val_reg);
+
+    ic_list.push_back( new Move_IC_Stmt(opr, register_ret_val, register_result)) ;
+  }
+
+  Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
+  return rel_expr_code;
+}

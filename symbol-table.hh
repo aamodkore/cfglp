@@ -66,6 +66,7 @@ public:
 	void print(ostream & file_buffer);
 
 	void push_symbol(Symbol_Table_Entry * variable);
+	list<Symbol_Table_Entry *> * get_variable_table() ;
 
 	bool variable_in_symbol_list_check(string variable);
 	Symbol_Table_Entry & get_symbol_table_entry(string variable_name);

@@ -82,10 +82,12 @@ typedef enum
 { 
 	load, 
 	imm_load, 
-	store, 
+	store,
+	mv, 
 	load_d, 
 	imm_load_d, 
 	store_d, 
+	mv_d,
 	label,
 	jump,
 	bne,
@@ -107,6 +109,7 @@ typedef enum
 	neg_d,
 	cast_int,
 	cast_float,
+	call,
 	nop
 } Tgt_Op;
 
@@ -278,14 +281,17 @@ class Label_IC_Stmt: public Icode_Stmt {
 };
 
 class Control_Flow_IC_Stmt: public Icode_Stmt {
-	int label_no;
+	string label_name;
+	int offset;
 	Ics_Opd * l_opd;
 	Ics_Opd * r_opd;
 
  public:
 	Control_Flow_IC_Stmt();
-	Control_Flow_IC_Stmt(int no);   /* Unconditional Branch  */
-	Control_Flow_IC_Stmt(Tgt_Op op,  Ics_Opd * opd1, Ics_Opd * opd2, int no);   /* Conditional Branch  */
+	Control_Flow_IC_Stmt(int no);   
+	Control_Flow_IC_Stmt(Tgt_Op op, string name, int offset);   
+	Control_Flow_IC_Stmt(Tgt_Op op, Ics_Opd *, Ics_Opd *, int no);  
+	Control_Flow_IC_Stmt(Tgt_Op op, Ics_Opd *, Ics_Opd *, string );
 	~Control_Flow_IC_Stmt();
 
 	Instruction_Descriptor & get_inst_op_of_ics();
@@ -319,6 +325,22 @@ class Unary_IC_Stmt: public Icode_Stmt {
 	Unary_IC_Stmt();
 	Unary_IC_Stmt(Tgt_Op op, Ics_Opd * res, Ics_Opd *);
 	~Unary_IC_Stmt();
+
+	Instruction_Descriptor & get_inst_op_of_ics();
+
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+class Store_Param_IC_Stmt: public Icode_Stmt {
+	Ics_Opd * result;
+	Ics_Opd * opd;
+	int offset;
+
+ public:
+	Store_Param_IC_Stmt();
+	Store_Param_IC_Stmt(Tgt_Op op, Ics_Opd * res, Ics_Opd *, int off);
+	~Store_Param_IC_Stmt();
 
 	Instruction_Descriptor & get_inst_op_of_ics();
 

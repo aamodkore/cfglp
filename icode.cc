@@ -91,10 +91,7 @@ void Mem_Addr_Opd::print_asm_opd(ostream & file_buffer)
 	if (symbol_scope == local)
 	{
 		int offset = symbol_entry->get_start_offset();
-		if(offset <= 0)  
-			file_buffer << offset << "($fp)";
-		else
-			file_buffer << "-" << offset << "($fp)";
+		file_buffer << -offset << "($fp)";
 	}
 	else
 		file_buffer << symbol_entry->get_variable_name();
@@ -363,18 +360,45 @@ void Label_IC_Stmt::print_assembly(ostream & file_buffer) {
 
 /******************************* Class Control_Flow_IC_Stmt ***********************/
 Control_Flow_IC_Stmt::Control_Flow_IC_Stmt() {
-	label_no = 0;
+	label_name = "";
+	offset = 0 ;
 }
 Control_Flow_IC_Stmt::Control_Flow_IC_Stmt(int no) {
-	label_no = no;
+	offset = 0 ;
+	stringstream label_str ;
+	label_str << "label" << no ;
+	label_name = label_str.str();
 	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[jump] != NULL),
 			"Instruction description in spim table cannot be null");
 
 	op_desc = *(machine_dscr_object.spim_instruction_table[jump]);
 }
 
+Control_Flow_IC_Stmt::Control_Flow_IC_Stmt(Tgt_Op op, string name, int off) {
+	label_name = name;
+	offset = off ;
+	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),
+			"Instruction description in spim table cannot be null");
+
+	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
+}
+
 Control_Flow_IC_Stmt::Control_Flow_IC_Stmt(Tgt_Op op, Ics_Opd * opd1, Ics_Opd * opd2, int no) {
-	label_no = no;
+	stringstream label_str ;
+	offset = 0 ;
+	label_str << "label" << no ;
+	label_name = label_str.str();
+	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),
+			"Instruction description in spim table cannot be null");
+
+	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
+	l_opd = opd1;
+	r_opd = opd2;
+}
+	
+Control_Flow_IC_Stmt::Control_Flow_IC_Stmt(Tgt_Op op, Ics_Opd * opd1, Ics_Opd * opd2, string name) {
+	offset = 0 ;
+	label_name = name;
 	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),
 			"Instruction description in spim table cannot be null");
 
@@ -394,7 +418,7 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer) {
 	switch (ic_format)
 	{
 	case i_op_o1: 
-		file_buffer << "\t" <<  op_name << " label" << label_no ;
+		file_buffer << "\t" <<  op_name << " " << label_name ;
 		file_buffer << "\n";
 		break; 
 	case i_branch:
@@ -408,7 +432,7 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer) {
 		l_opd->print_ics_opd(file_buffer);
 		file_buffer << " , ";
 		r_opd->print_ics_opd(file_buffer);
-		file_buffer << " : goto label" << label_no;
+		file_buffer << " : goto " << label_name;
 		file_buffer << "\n";
 		break;
 
@@ -424,14 +448,18 @@ void Control_Flow_IC_Stmt::print_assembly(ostream & file_buffer) {
 	switch (assem_format)
 	{
 	case a_op_o1: 
-		file_buffer << "\t" << op_name << " label" << label_no << endl;
+		if (offset != 0 )
+			file_buffer << "\tsub $sp, $sp, " << offset << endl;
+		file_buffer << "\t" << op_name << " " << label_name << endl;
+		if (offset != 0 )
+			file_buffer << "\tadd $sp, $sp, " << offset << endl;
 		break; 
 	case a_branch:
 		file_buffer << "\t" << op_name << " ";
 		l_opd->print_asm_opd(file_buffer);
 		file_buffer << ", ";
 		r_opd->print_asm_opd(file_buffer);
-		file_buffer << ", label" << label_no << endl;
+		file_buffer << ", " << label_name << endl;
 		break;
 
 	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
@@ -563,8 +591,8 @@ void Unary_IC_Stmt::print_icode(ostream & file_buffer) {
 	}
 }
 void Unary_IC_Stmt::print_assembly(ostream & file_buffer) {
-	CHECK_INVARIANT (opd, "Right Opd cannot be NULL for a Compute IC Stmt");
-	CHECK_INVARIANT (result, "Result cannot be NULL for a Compute IC Stmt");
+	CHECK_INVARIANT (opd, "Right Opd cannot be NULL for a IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a IC Stmt");
 
 	string operation_name = op_desc.get_mnemonic();
 
@@ -581,6 +609,78 @@ void Unary_IC_Stmt::print_assembly(ostream & file_buffer) {
 			break; 
 
 	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+				"Intermediate code format not supported");
+		break;
+	}
+}
+
+/******************************Class Store_Param_IC_Stmt ***************************/
+Store_Param_IC_Stmt::Store_Param_IC_Stmt() 
+{}
+
+Store_Param_IC_Stmt::Store_Param_IC_Stmt(Tgt_Op op, Ics_Opd * res, Ics_Opd * val, int off) {
+	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),
+			"Instruction description in spim table cannot be null");
+	
+	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
+	result = res;
+	opd = val;
+	offset = off ;
+}
+Store_Param_IC_Stmt::~Store_Param_IC_Stmt() 
+{}
+
+Instruction_Descriptor & Store_Param_IC_Stmt::get_inst_op_of_ics() {}
+
+void Store_Param_IC_Stmt::print_icode(ostream & file_buffer) {
+	CHECK_INVARIANT (opd, "Opd1 cannot be NULL for a store IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a store IC Stmt");
+
+	string operation_name = op_desc.get_name();
+
+	Icode_Format ic_format = op_desc.get_ic_format();
+
+	switch (ic_format)
+	{
+	case i_r_op_o1: 
+			file_buffer << "\t" << operation_name ;
+			if (operation_name.size()<7) 
+				file_buffer << ":\t\t";
+			else if (operation_name.size()<15)
+				file_buffer << ":\t";
+			else
+				file_buffer << ":";
+			result->print_ics_opd(file_buffer);
+			file_buffer << " <- ";
+			opd->print_ics_opd(file_buffer);
+			file_buffer << "\n";
+
+			break; 
+
+	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+				"Intermediate code format not supported");
+		break;
+	}
+}
+void Store_Param_IC_Stmt::print_assembly(ostream & file_buffer) {
+	CHECK_INVARIANT (opd, "Opd cannot be NULL for a store IC Stmt");
+	CHECK_INVARIANT (result, "Result cannot be NULL for a store IC Stmt");
+	string op_name = op_desc.get_mnemonic();
+
+	Assembly_Format assem_format = op_desc.get_assembly_format();
+	switch (assem_format)
+	{
+	case a_op_o1_r: 
+	  	file_buffer << "\t" << op_name << " ";
+		opd->print_asm_opd(file_buffer);
+		file_buffer << ", ";
+		file_buffer << -offset << "($sp)";
+		file_buffer << "\n";
+
+		break; 
+
+	default: 
+		CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 				"Intermediate code format not supported");
 		break;
 	}

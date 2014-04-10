@@ -204,6 +204,8 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		  		typeid(*source_memory) == typeid(Multiplication_Ast) ||
 		  		typeid(*source_memory) == typeid(Division_Ast) ||
 		  		typeid(*source_memory) == typeid(Unary_Ast) ||
+		  		typeid(*source_memory) == typeid(Call_Ast) ||
+		  		typeid(*source_memory) == typeid(Return_Ast) ||
 		  		typeid(*source_memory) == typeid(Type_Cast_Ast)) return;
 			// cout << "in mc2m\n";
 			if (source_memory->get_data_type() == float_data_type)
@@ -314,6 +316,7 @@ void Machine_Description::initialize_register_table()
 	spim_register_table[s5] = new Register_Descriptor(s5, "s5", int_num, gp_data);
 	spim_register_table[s6] = new Register_Descriptor(s6, "s6", int_num, gp_data);
 	spim_register_table[s7] = new Register_Descriptor(s7, "s7", int_num, gp_data);
+	spim_register_table[f0] = new Register_Descriptor(f0, "f0", float_num, fn_result);
 	spim_register_table[f2] = new Register_Descriptor(f2, "f2", float_num, gp_data);
 	spim_register_table[f4] = new Register_Descriptor(f4, "f4", float_num, gp_data);
 	spim_register_table[f6] = new Register_Descriptor(f6, "f6", float_num, gp_data);
@@ -333,10 +336,13 @@ void Machine_Description::initialize_instruction_table()
 	spim_instruction_table[store] = new Instruction_Descriptor(store, "store", "sw", "", i_r_op_o1, a_op_o1_r);
 	spim_instruction_table[load] = new Instruction_Descriptor(load, "load", "lw", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[imm_load] = new Instruction_Descriptor(imm_load, "iLoad", "li", "", i_r_op_o1, a_op_r_o1);
+    spim_instruction_table[mv] = new Instruction_Descriptor(mv, "move", "move", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[store_d] = new Instruction_Descriptor(store_d, "store.d", "s.d", "", i_r_op_o1, a_op_o1_r);
 	spim_instruction_table[load_d] = new Instruction_Descriptor(load_d, "load.d", "l.d", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[imm_load_d] = new Instruction_Descriptor(imm_load_d, "iLoad.d", "li.d", "", i_r_op_o1, a_op_r_o1);
+    spim_instruction_table[mv_d] = new Instruction_Descriptor(mv_d, "move.d", "move.d", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[label] = new Instruction_Descriptor(label, "label", "label", "", i_label, a_label);
+	spim_instruction_table[call] = new Instruction_Descriptor(call, "call", "jal", "", i_op_o1, a_op_o1);
 	spim_instruction_table[jump] = new Instruction_Descriptor(jump, "goto", "j", "", i_op_o1, a_op_o1);
 	spim_instruction_table[bne] = new Instruction_Descriptor(bne, "bne", "bne", "", i_branch, a_branch);
 	spim_instruction_table[seq] = new Instruction_Descriptor(seq, "seq", "seq", "", i_r_o1_op_o2, a_op_r_o1_o2);
@@ -428,6 +434,36 @@ Register_Descriptor * Machine_Description::get_new_float_register()
 	}
 
 	
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+			"Error in get_new_reg or register requirements of input program cannot be met");
+}
+
+Register_Descriptor * Machine_Description::get_fn_ret_register()
+{
+	Register_Descriptor * reg_desc;
+	map<Spim_Register, Register_Descriptor *>::iterator i;
+	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
+	{
+		reg_desc = i->second;
+		if (reg_desc->get_use_category()==fn_result && reg_desc->get_value_type()==int_num) { 
+		  return reg_desc;
+		}
+	}
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
+			"Error in get_new_reg or register requirements of input program cannot be met");
+}
+
+Register_Descriptor * Machine_Description::get_fn_ret_float_register()
+{
+	Register_Descriptor * reg_desc;
+	map<Spim_Register, Register_Descriptor *>::iterator i;
+	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
+	{
+		reg_desc = i->second;
+		if (reg_desc->get_use_category()==fn_result && reg_desc->get_value_type()==float_num) { 
+		  return reg_desc;
+		}
+	}
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 			"Error in get_new_reg or register requirements of input program cannot be met");
 }
