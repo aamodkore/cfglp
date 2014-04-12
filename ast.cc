@@ -596,6 +596,7 @@ Code_For_Ast & Return_Ast::compile()
 		rreg->reset_use_for_expr_result();
 		rreg->clear_lra_symbol_list();
 	}
+	ic_list.push_back(new Control_Flow_IC_Stmt(jump, "epilogue",0));
 	Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
 	return rel_expr_code;
 }
@@ -632,6 +633,7 @@ Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 		// Free the previous result register.
 		rreg->reset_use_for_expr_result();
 	}
+	ic_list.push_back(new Control_Flow_IC_Stmt(jump, "epilogue",0));
 	Code_For_Ast & rel_expr_code = *new Code_For_Ast(ic_list, result_reg);
 	return rel_expr_code;
 }

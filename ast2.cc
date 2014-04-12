@@ -1237,7 +1237,7 @@ Code_For_Ast & Call_Ast::compile() {
       step = 4 ;
     }
     else if (areg->get_value_type() == float_num) {
-      opr = store ; /** CHANGE HERE ::: store --> store_d **/
+      opr = store_d ; 
       step = 8 ;
     }
     else {

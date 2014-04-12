@@ -277,8 +277,8 @@ void Procedure::print_epilogue(ostream & file_buffer)
 
 	int size = local_symbol_table.get_size();
 	{
-	   epilogue << "\n# Epilogue Begins\n\tadd $sp, $sp, " << size + 8 << "\n";
-	   epilogue << "\tlw $fp, -4($sp)  \n\tlw $ra, 0($sp)  \n\tjr        $31\t\t# Jump back to the operating system.\n# Epilogue Ends\n\n";
+	   epilogue << "\n# Epilogue Begins\nepilogue:\n\tadd $sp, $sp, " << size + 8 << "\n";
+	   epilogue << "\tlw $fp, -4($sp)  \n\tlw $ra, 0($sp)  \n\tjr        $31\t\t# Jump back to the called procedure\n# Epilogue Ends\n\n";
 	}
 
 	file_buffer << epilogue.str();
