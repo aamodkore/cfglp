@@ -145,8 +145,10 @@ void Program::print()
 	}
 
 	map<string, Procedure *>::iterator i;
-	for(i = procedure_map.begin(); i != procedure_map.end(); i++)
+	for(i = procedure_map.begin(); i != procedure_map.end(); i++) {
+		curr_procedure = i->second ;
 		i->second->print(*file_buffer);
+	}
 }
 
 Eval_Result & Program::evaluate()
@@ -186,6 +188,7 @@ void Program::compile()
 	map<string, Procedure *>::iterator i;
 	for(i = procedure_map.begin(); i != procedure_map.end(); i++)
 	{
+		curr_procedure = i->second ;
 		i->second->compile();
 		if(command_options.is_show_ic_selected())
 		{
@@ -213,6 +216,8 @@ void Program::print_assembly()
 
 	// print each procedure
 	map<string, Procedure *>::iterator i;
-	for (i = procedure_map.begin(); i != procedure_map.end(); i++)
+	for (i = procedure_map.begin(); i != procedure_map.end(); i++) {
+		curr_procedure = i->second ;
 		i->second->print_assembly(file_buffer);
+	}
 }

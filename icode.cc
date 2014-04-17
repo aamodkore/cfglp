@@ -37,6 +37,7 @@ using namespace std;
 #include "reg-alloc.hh"
 #include "symbol-table.hh"
 #include "ast.hh"
+#include "procedure.hh"
 #include "program.hh"
 
 /****************************** Class Ics_Opd *****************************/
@@ -417,6 +418,9 @@ void Control_Flow_IC_Stmt::print_icode(ostream & file_buffer) {
 	string op_name = op_desc.get_name();
 	switch (ic_format)
 	{
+	case i_op: 
+		file_buffer << "\t" <<  op_name << "\n";
+		break; 
 	case i_op_o1: 
 		file_buffer << "\t" <<  op_name << " " << label_name ;
 		file_buffer << "\n";
@@ -447,6 +451,11 @@ void Control_Flow_IC_Stmt::print_assembly(ostream & file_buffer) {
 	Assembly_Format assem_format = op_desc.get_assembly_format();
 	switch (assem_format)
 	{
+	case a_op_r: 
+		file_buffer << "\t" << op_name << " " << label_name ; 
+		if (curr_procedure) file_buffer << "_" << curr_procedure->get_proc_name() ;
+		file_buffer << endl;
+		break; 
 	case a_op_o1: 
 		if (offset != 0 )
 			file_buffer << "\tsub $sp, $sp, " << offset << endl;

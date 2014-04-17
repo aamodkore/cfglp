@@ -21,23 +21,23 @@
 
 ***********************************************************************************************/
 
-#include<string>
-#include<fstream>
-#include<iostream>
+#include <string>
+#include <fstream>
+#include <iostream>
 
 using namespace std;
 
-#include"common-classes.hh"
-#include"error-display.hh"
-#include"user-options.hh"
-#include"local-environment.hh"
-#include"icode.hh"
-#include"reg-alloc.hh"
-#include"symbol-table.hh"
-#include"ast.hh"
-#include"basic-block.hh"
-#include"procedure.hh"
-#include"program.hh"
+#include "common-classes.hh"
+#include "error-display.hh"
+#include "user-options.hh"
+#include "local-environment.hh"
+#include "icode.hh"
+#include "reg-alloc.hh"
+#include "symbol-table.hh"
+#include "ast.hh"
+#include "basic-block.hh"
+#include "procedure.hh"
+#include "program.hh"
 
 Procedure * curr_procedure;
 
@@ -277,7 +277,7 @@ void Procedure::print_epilogue(ostream & file_buffer)
 
 	int size = local_symbol_table.get_size();
 	{
-	   epilogue << "\n# Epilogue Begins\nepilogue:\n\tadd $sp, $sp, " << size + 8 << "\n";
+	   epilogue << "\n# Epilogue Begins\nepilogue_" << name << ":\n\tadd $sp, $sp, " << size + 8 << "\n";
 	   epilogue << "\tlw $fp, -4($sp)  \n\tlw $ra, 0($sp)  \n\tjr        $31\t\t# Jump back to the called procedure\n# Epilogue Ends\n\n";
 	}
 

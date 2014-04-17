@@ -110,7 +110,8 @@ typedef enum
 	cast_int,
 	cast_float,
 	call,
-	nop
+	ret,
+	nop = 0
 } Tgt_Op;
 
 ///////////////////////// Instruction Descriptor ///////////////////////////////////
