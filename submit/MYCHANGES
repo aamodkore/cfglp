@@ -1,19 +1,23 @@
 *****************************************************************************************
 
-CS 306 - Assignment 6b
+CS 306 - Assignment 7
 
 	S S Kausik	110050003
 	Aamod Kore	110050004
 
 *****************************************************************************************
 
-Changes done after Level2 Intermidiate Code Generation :
+Changes done after Level2 Compiler :
 
-1. Added symbol table entries and offsets for float type registers.
+1. 	Added grammar rules in 'parser.yy' for function declarations, definitions, function 
+	calls and return statements.
 
-2. Added code for compile_and_optimize functions in Arithmetic Expression ASTs.
+2. 	Added appropriate instructions for calling a function and return statement.
 
-3. Modified code of compile_and_optimize in Assignment, Name and Float ASTs as well as
-   optimize_lra of Lra_Outcome to incorporate float data types.
+3. 	Added Code for Call_Ast and Return_Ast for both compile and compile_and_optimise as 
+	well as code of optimize_lra in Lra_Outcome for function calls.
+	
+4. 	Modified assign_offset for argument Symbol Table in a procedure and modified printing
+	Symbol Table for a procedure.
 
 *****************************************************************************************
