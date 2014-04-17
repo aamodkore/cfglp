@@ -1317,7 +1317,7 @@ Code_For_Ast & Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra) {
       step = 4 ;
     }
     else if (areg->get_value_type() == float_num) {
-      opr = store ; /** CHANGE HERE ::: store --> store_d **/
+      opr = store_d ; /** CHANGE HERE ::: store --> store_d **/
       step = 8 ;
     }
     else {
